@@ -80,6 +80,15 @@ site up to **7 times**, the browser is reset to a first-time visitor each visit,
 (0–100) each visit; `scripts/decay_slope.py` computes the least-squares **decay slope** (negative =
 interest fades on repeat). Two nested loops: outer over visits (≤ 7), inner over actions per visit.
 
+Here the persona **leaves on its own** — the moment it leaves is the measurement, so the loop
+never force-cuts a live session. Each visit records a `stopReason`: `bored`/`explored` (voluntary,
+the clean signal — used for the slope), `stuck` (wandering; self-detected and cut immediately,
+excluded + flagged for re-run), or `budget_cut` (a generous circuit breaker, censored). Token cost
+is controlled by the wandering cut and by bored personas leaving fast in later visits — not by a
+tight step ceiling, which would clip the naturally long early visits. (For deterministic,
+harness-grade token control — exact DOM-hash cuts, skipping the LLM when the screen is unchanged,
+per-session token caps — ② can instead be run as a standalone Python harness; ask if you want that.)
+
 ```
 /tmp-ux:ux-review-one-persona-loop https://example.com --persona busy_operator --iterations 7
 ```

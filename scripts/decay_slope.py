@@ -1,28 +1,33 @@
 #!/usr/bin/env python3
-"""Interest-decay slope for ONE persona's repeat-visit loop.
+"""Interest-decay slope for ONE persona's repeat-visit loop, gated by stop_reason.
 
 Usage:  python decay_slope.py <visits.json>
   <visits.json> is shaped:
     { "id": "busy_operator", "url": "...", "goal": "...",
-      "visits": [ { "visit": 1, "interest": 82, "completed": false, "turns": 3,
-                    "summary": "..." }, ... ] }
+      "visits": [ { "visit": 1, "stopReason": "bored", "interest": 82,
+                    "completed": false, "turns": 3, "summary": "..." }, ... ] }
 
-Prints a metrics JSON to stdout. The least-squares slope of interest over the visit
-axis is the "how fast this cold-start gets stale on repeat exposure" number. Negative
-slope = decay. All arithmetic lives here so the number is exact and reproducible.
+The decay slope is the least-squares slope of interest over the visit axis (negative =
+interest fades on repeat). Sessions are gated by how they ended:
 
-Mirrors the slope() / verdict() logic of the original interest_decay_loop.py.
+  bored / explored -> clean voluntary exit; USED for the slope (the real signal)
+  stuck            -> wandering/malfunction; EXCLUDED and flagged for re-run
+  budget_cut       -> hit the circuit breaker; CENSORED (a lower bound only), not in the slope
+
+All arithmetic lives here so the number is exact and reproducible.
 """
 
 import json
 import statistics
 import sys
 
-# Force UTF-8 stdout so Korean output survives Windows' default cp949 console.
 try:
     sys.stdout.reconfigure(encoding="utf-8")
 except AttributeError:
     pass
+
+VALID_STOP = {"bored", "explored", "stuck", "budget_cut"}
+CLEAN = {"bored", "explored"}  # only these count toward the decay slope
 
 
 def fail(msg):
@@ -30,10 +35,8 @@ def fail(msg):
     sys.exit(1)
 
 
-def slope(ys):
-    """Least-squares slope of interest vs visit index (1,2,3...). Negative = decay."""
-    n = len(ys)
-    xs = list(range(1, n + 1))
+def slope_xy(xs, ys):
+    """Least-squares slope of ys over xs (visit indices, not necessarily contiguous)."""
     mx, my = statistics.mean(xs), statistics.mean(ys)
     denom = sum((x - mx) ** 2 for x in xs)
     if denom == 0:
@@ -70,32 +73,66 @@ def main():
     if len(visits) > 7:
         warnings.append(f"received {len(visits)} visits; this loop is capped at 7")
 
-    interests, completed_count = [], 0
+    stop_counts = {"bored": 0, "explored": 0, "stuck": 0, "budget_cut": 0, "unknown": 0}
+    series = []            # every visit, annotated, for display
+    clean_pts = []         # (visitIndex, interest) for bored/explored only
+    rerun_needed = []      # stuck visit indices
+    censored = []          # budget_cut visit indices
+    completed_count = 0
+
     for i, v in enumerate(visits, 1):
+        stop = v.get("stopReason")
+        if stop not in VALID_STOP:
+            warnings.append(f"visit {i}: stopReason missing/invalid (got {json.dumps(stop)}); treated as 'unknown'")
+            stop = "unknown"
+        stop_counts[stop] += 1
+
         iv = v.get("interest")
-        if valid_interest(iv):
-            interests.append(iv)
-        else:
+        ivv = iv if valid_interest(iv) else None
+        if ivv is None:
             warnings.append(f"visit {i}: interest missing or out of range (got {json.dumps(iv)})")
+        series.append({"visit": i, "interest": ivv, "stopReason": stop})
+
         if v.get("completed") is True:
             completed_count += 1
 
-    if not interests:
-        fail("no valid interest scores to compute a slope")
+        if stop == "stuck":
+            rerun_needed.append(i)          # excluded from the slope, re-run
+        elif stop == "budget_cut":
+            censored.append(i)              # censored lower bound, not in the slope
+        elif stop in CLEAN and ivv is not None:
+            clean_pts.append((i, ivv))      # the clean signal
 
-    s = slope(interests)
+    # Slope from clean (bored/explored) sessions only.
+    if len(clean_pts) >= 2:
+        xs = [x for x, _ in clean_pts]
+        ys = [y for _, y in clean_pts]
+        s = round(slope_xy(xs, ys), 3)
+        v_text = verdict(s)
+        first_interest, last_interest = ys[0], ys[-1]
+        drop = first_interest - last_interest
+    else:
+        s = None
+        v_text = "감쇠 기울기 계산 불가 — 자발 종료(bored/explored) 세션이 2개 미만 (재실행 또는 방문 수 확대 필요)"
+        first_interest = last_interest = drop = None
+        warnings.append("fewer than 2 clean (bored/explored) sessions; slope not computed")
 
     out = {
         "id": data.get("id"),
         "url": data.get("url"),
         "goal": data.get("goal"),
-        "n": len(interests),
-        "interests": interests,
-        "firstInterest": interests[0],
-        "lastInterest": interests[-1],
-        "drop": interests[0] - interests[-1],
-        "slope": round(s, 3),
-        "verdict": verdict(s),
+        "visits": len(visits),
+        "stopReasons": stop_counts,
+        "cleanSessions": len(clean_pts),
+        "rerunNeeded": rerun_needed,
+        "censored": censored,
+        "series": series,
+        "slopeInterests": [y for _, y in clean_pts],
+        "slope": s,
+        "verdict": v_text,
+        "firstInterest": first_interest,
+        "lastInterest": last_interest,
+        "drop": drop,
         "completedCount": completed_count,
         "warnings": warnings,
     }

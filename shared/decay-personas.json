@@ -1,8 +1,8 @@
 {
   "product_url": "https://example.com",
   "iterations": 7,
-  "max_steps_per_session": 8,
-  "_note": "One-persona interest-decay loop. iterations is HARD-CAPPED at 7. The loop runs for exactly ONE chosen persona. Edit / add personas freely; each needs id, persona, task_goal.",
+  "max_steps_per_session": 15,
+  "_note": "One-persona interest-decay loop. iterations is HARD-CAPPED at 7. max_steps_per_session is a GENEROUS circuit breaker, not a target — the persona leaves voluntarily (bored/explored) or is cut for wandering (stuck) long before this; it only stops runaways. Do not lower it to save tokens (that clips real long early visits); wandering detection controls cost. The loop runs for exactly ONE chosen persona. Edit / add personas freely; each needs id, persona, task_goal.",
 
   "personas": [
     {

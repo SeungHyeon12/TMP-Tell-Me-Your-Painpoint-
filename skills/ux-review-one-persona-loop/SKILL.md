@@ -37,8 +37,24 @@ share one browser) — passing:
 - the chosen persona (persona text + task_goal) and the url,
 - `visitNumber = i`, `totalVisits = N`,
 - `memory` = the array of prior visits' `summary` strings,
-- `maxSteps` = `max_steps_per_session` from the config (default 8) — this is the **inner loop**
-  the runner executes.
+- `maxSteps` = `max_steps_per_session` from the config — a **generous circuit breaker**, NOT a
+  target. The runner runs the **inner loop** and decides when to leave on its own.
+
+**How each visit ends (this is the whole point — don't just run to `maxSteps`).** The runner
+classifies its exit in `stopReason`, and here the moment of leaving IS the measurement:
+
+- **bored / explored** — the persona left voluntarily (out of interest, or having seen it all).
+  This is the clean signal, and it also controls cost: a bored persona leaves in 2–3 steps, so
+  later visits get naturally short and cheap. Preserve this — never force the runner to keep going.
+- **stuck** — wandering / spinning with no progress. The runner self-detects this (no page change
+  over 3 actions, revisiting a state a 3rd time, or nothing new in 4 actions) and cuts immediately.
+  **This is the real token lever** — it kills spinning sessions in a few steps so nothing runs away.
+- **budget_cut** — hit the circuit breaker `maxSteps`. Should be rare.
+
+Do NOT lower `maxSteps` to control cost — that would clip the naturally long early visits (real
+signal). Cost is controlled by the wandering cut + voluntary leave, not by a tight ceiling. (For
+rigor you can pilot once with a large cap to see where the persona naturally leaves, then set
+`maxSteps` to ~2–3× that median.)
 
 After each visit, append the returned `summary` to `memory` (this is where decay accumulates) and
 record the returned visit object. Never reset `memory` between visits — only the browser resets.
@@ -57,11 +73,18 @@ at `${CLAUDE_PROJECT_DIR}/.decay-visits.json`, then run:
 python "${CLAUDE_PLUGIN_ROOT}/scripts/decay_slope.py" "${CLAUDE_PROJECT_DIR}/.decay-visits.json"
 ```
 
-Use its output (slope, verdict, interest series, drop) **verbatim** — do not recompute the slope.
+Use its output **verbatim** — do not recompute the slope. The script **gates by stopReason**: the
+slope is computed from **bored/explored sessions only** (the clean signal); `stuck` visits are
+excluded and listed in `rerunNeeded`; `budget_cut` visits are censored (a lower bound) and left out
+of the slope. If fewer than 2 clean sessions exist, `slope` is `null` — tell the user the run was
+inconclusive (mostly stuck/censored) and suggest re-running.
 
 ## Report
 
-Give the user: the persona, the interest series across visits (e.g. `85 → 70 → … → 30`), the
-**decay slope** and its verdict, first→last drop, and how many visits completed the goal. Add one
-or two sentences of interpretation grounded in the per-visit summaries (what specifically made
-interest fade or hold). If `warnings` are present, surface them.
+Give the user: the persona, the interest series across visits annotated with how each ended
+(e.g. `85(bored) → 72(explored) → [50 stuck, excluded] → 55(bored) → …`), the **decay slope** and
+its verdict, first→last drop, and the **stopReason breakdown** (how many bored/explored vs stuck vs
+budget_cut, and `cleanSessions` used for the slope). Call out any `rerunNeeded` (stuck) visits.
+Add one or two sentences of interpretation grounded in the per-visit summaries (what specifically
+made interest fade or hold — and whether later visits ended faster, which is decay showing as
+behavior). If `warnings` are present, surface them.

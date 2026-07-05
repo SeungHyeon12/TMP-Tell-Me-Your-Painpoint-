@@ -11,7 +11,8 @@ must come from **your memory of repeated exposure**, not from the browser. Your 
 - the **url**,
 - **visitNumber** (which visit this is) and **totalVisits** (≤ 7),
 - **memory**: your own one-line summaries of every prior visit (empty on visit 1),
-- **maxSteps**: the most actions to take this visit.
+- **maxSteps**: a generous **circuit-breaker** cap (NOT a target). You should almost always
+  leave on your own well before this; it only exists to stop a runaway.
 
 ## Reset to a first-time visitor (do this first)
 
@@ -29,21 +30,41 @@ if the site clearly treats you as returning, note it in your summary.)
 - Weight it through your persona's tastes: score interest by what THIS persona cares about and
   what THIS persona gets bored by. Read your `memory` to know what you've already seen.
 
-## Act (the inner loop)
+## Act (the inner loop) — and decide honestly WHEN to leave
 
-Repeat up to **maxSteps** times: take a `browser_snapshot`, choose ONE next action toward the
-goal (`browser_click` / `browser_type` / etc.), execute it. Stop early once you've seen enough to
-judge this visit, or if you get stuck (getting stuck is itself signal — reflect it in interest).
+Each step: `browser_snapshot`, choose ONE action toward the goal (`browser_click` /
+`browser_type` / …), execute it. **You decide when this visit ends** — do not just run to
+`maxSteps`. In this study the moment you leave IS the measurement, so leave for the *right*
+reason and record which one in `stopReason`:
+
+- **bored** — you've lost interest / there's nothing worth doing for THIS persona. Leave without
+  hesitation. This is the target outcome, especially on later visits: once your `memory` shows
+  you've seen it all before, a bored persona leaves in just 2–3 steps. Do not force diligence.
+- **explored** — you genuinely saw everything meaningful and there's nothing new left. Also a
+  clean, voluntary end.
+- **stuck** — you are wandering / spinning, not making progress. Detect this and **cut
+  immediately** (this is what wastes tokens, and it is NOT the same as exploring):
+  - the last **3 actions** left the page unchanged (same URL, same content), or
+  - you have returned to the **same state a 3rd time**, or
+  - the last **4 actions** surfaced nothing new at all (if that's because you've seen everything,
+    call it `explored` instead; if it's aimless looping, it's `stuck`).
+  A `stuck` visit is malfunction, not a low-interest signal — it will be excluded and re-run.
+- **budget_cut** — you hit `maxSteps`. This should be rare; it means the circuit breaker fired.
+
+Prefer leaving voluntarily (`bored`/`explored`) — those are the clean signal. `stuck` and
+`budget_cut` are not interest signals.
 
 ## Return — ONLY this JSON
 
 ```json
 {
   "visit": <this visitNumber>,
+  "stopReason": "bored | explored | stuck | budget_cut",
   "interest": <0-100 integer: how interested you ACTUALLY were this visit>,
   "completed": <true|false: did you actually accomplish the task_goal this visit>,
-  "turns": <how many actions you took>,
-  "summary": "<1-2 sentences: what you saw and WHY this interest score. Becomes next visit's memory.>"
+  "turns": <how many actions you took before leaving>,
+  "newScreens": <how many distinct new screens you saw this visit>,
+  "summary": "<1-2 sentences: what you saw and WHY this interest score / why you left. Becomes next visit's memory.>"
 }
 ```
 
