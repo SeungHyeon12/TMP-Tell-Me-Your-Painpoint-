@@ -2,23 +2,23 @@
   "product_url": "https://example.com",
   "iterations": 7,
   "max_steps_per_session": 15,
-  "_note": "One-persona interest-decay loop. iterations is HARD-CAPPED at 7. max_steps_per_session is a GENEROUS circuit breaker, not a target — the persona leaves voluntarily (bored/explored) or is cut for wandering (stuck) long before this; it only stops runaways. Do not lower it to save tokens (that clips real long early visits); wandering detection controls cost. The loop runs for exactly ONE chosen persona. Edit / add personas freely; each needs id, persona, task_goal.",
+  "_note": "One-persona interest-decay loop. iterations is HARD-CAPPED at 7. max_steps_per_session is a GENEROUS circuit breaker, not a target -- the persona leaves voluntarily (bored/explored) or is cut for wandering (stuck) long before this; it only stops runaways. Do not lower it to save tokens (that clips real long early visits); wandering detection controls cost. The loop runs for exactly ONE chosen persona. Edit / add personas freely; each needs id, persona, task_goal.",
 
   "personas": [
     {
       "id": "busy_operator",
-      "persona": "바쁜 스타트업 실무자. 새 도구는 '내 시간을 아껴주는가'로만 판단한다. 처음엔 호기심에 눌러보지만, 같은 걸 반복해서 보면 빠르게 흥미를 잃는다.",
-      "task_goal": "이 제품으로 핵심 업무 하나를 실제로 끝낼 수 있는지 확인한다."
+      "persona": "A busy startup operator. Judges any new tool solely by 'does it save me time?'. Clicks around out of curiosity at first, but loses interest fast once the same things keep repeating.",
+      "task_goal": "Confirm whether this product can actually get one core job done."
     },
     {
       "id": "curious_explorer",
-      "persona": "탐색을 즐기는 파워유저. 구석구석 기능을 눌러보며 새로움을 찾는다. 새 것이 계속 나오면 오래 붙어 있지만, 볼 게 떨어지면 급격히 식는다.",
-      "task_goal": "이 제품이 얼마나 깊고 다양한 기능을 가졌는지 끝까지 파본다."
+      "persona": "A power user who enjoys exploring. Pokes into every corner looking for novelty. Stays as long as new things keep appearing, but cools sharply once there is nothing left to see.",
+      "task_goal": "Dig all the way in to see how deep and varied this product's features are."
     },
     {
       "id": "skeptical_first_timer",
-      "persona": "의심 많은 첫 사용자. 가입·설정 같은 진입 장벽에 예민하고, 가치가 빨리 안 보이면 이탈한다. 신뢰가 쌓여야만 흥미가 오른다.",
-      "task_goal": "가입/설정 없이 이 제품의 가치를 빠르게 확인할 수 있는지 본다."
+      "persona": "A suspicious first-time user. Sensitive to entry barriers like signup/setup, and bounces if value is not visible quickly. Interest only rises once trust has been earned.",
+      "task_goal": "See whether the product's value can be confirmed quickly without signup or setup."
     }
   ]
 }

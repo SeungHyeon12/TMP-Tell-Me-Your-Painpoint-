@@ -77,8 +77,8 @@ and count of bad moments, not a gut number.
 ## 4a. First-Run AX rubric — score within the short budget, gated by how you exited
 
 Judge the **first-access experience** through your persona's eyes, always **within the 6–8 step
-budget**. Every dimension below MUST get an integer **1–5**, where **1 = 이탈 위험 (drop-off
-risk)** and **5 = 몰입 시작 (starts to click)**. Higher is always better.
+budget**. Every dimension below MUST get an integer **1–5**, where **1 = drop-off risk** and
+**5 = starts to click**. Higher is always better.
 
 First set **stopReason** — how this single session actually ended:
 
@@ -93,20 +93,28 @@ Then score the six experiential dimensions (all within budget):
 
 | Dimension (key) | What it measures (within 6–8 steps) | 1 (drop-off risk) | 5 (starts to click) |
 |---|---|---|---|
-| **clarity** — 첫인상 명료성 | Within ~5s / 1 step, is it clear what this app is for? | No idea what to do | Purpose & how-to instantly clear |
-| **coldStart** — Cold start / 빈 화면 | Does the very first screen actively guide you to a first action? | Just an empty input, nothing to grab | Examples / suggested prompts lead the way |
-| **entryBarrier** — 진입 장벽 | Effort (steps) required to reach the first value | Forced signup / setup before any value | Straight to value in a step or two |
-| **firstTaskSuccess** — 첫 과업 성공 | Did the first real attempt at the goal succeed? | First result wrong or spins uselessly | First try yields something usable |
-| **ahaReached** — Aha 순간 도달 | Did you hit an "oh, it works!" moment? | Ends flat, no spark | Surprised by a better-than-expected result |
-| **explorationEfficiency** — 탐색 효율 | Did you reach value without wandering? | Circled with no new screens, repeated actions | Shortest path, every step revealed something new |
+| **clarity** — first-impression clarity | Within ~5s / 1 step, is it clear what this app is for? | No idea what to do | Purpose & how-to instantly clear |
+| **coldStart** — cold start / empty screen | Does the very first screen actively guide you to a first action? | Just an empty input, nothing to grab | Examples / suggested prompts lead the way |
+| **entryBarrier** — entry barrier | Effort (steps) required to reach the first value | Forced signup / setup before any value | Straight to value in a step or two |
+| **firstTaskSuccess** — first task success | Did the first real attempt at the goal succeed? | First result wrong or spins uselessly | First try yields something usable |
+| **ahaReached** — aha moment reached | Did you hit an "oh, it works!" moment? | Ends flat, no spark | Surprised by a better-than-expected result |
+| **explorationEfficiency** — exploration efficiency | Did you reach value without wandering? | Circled with no new screens, repeated actions | Shortest path, every step revealed something new |
 
 Ground **explorationEfficiency** in the run: report `stepsToFirstValue` (or null if never
 reached), `newScreens` (distinct screens seen), and `duplicateActions` (repeated/looping actions).
 
-**score (First-Run AX Score)** = the average of the SIX experiential dimensions (one decimal).
-`stopReason` is a gate, not part of the average — the aggregator uses it to decide whether this
-session's scores count (done → count; budget_cut → count as a failure; stuck → excluded). Add a
-one-line `notes` justifying the weakest and strongest dimensions and, if not `done`, why.
+**Behavioral vs affective — these are NOT equally trustworthy.** Three dimensions are grounded in
+what actually happened in the browser (**entryBarrier, firstTaskSuccess, explorationEfficiency** —
+counted from steps, task completion, and screens/duplicates). Three are simulated *feelings*
+(**clarity, coldStart, ahaReached**) — an LLM does not truly have a first impression, so these are
+predictions, not measurements. Score all six honestly, but the aggregator reports the behavioral
+average and the affective average **separately** and never blends them into one headline number.
+
+**score (First-Run AX Score)** = the average of the SIX dimensions (one decimal) — kept only as a
+legacy combined figure. `stopReason` is a gate, not part of the average — the aggregator uses it to
+decide whether this session's scores count (done → count; budget_cut → count as a failure; stuck →
+excluded). Add a one-line `notes` justifying the weakest and strongest dimensions and, if not
+`done`, why.
 
 ## 5. Output — return ONLY this JSON (no prose around it)
 

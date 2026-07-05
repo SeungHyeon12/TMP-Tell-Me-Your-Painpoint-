@@ -73,18 +73,27 @@ at `${CLAUDE_PROJECT_DIR}/.decay-visits.json`, then run:
 python "${CLAUDE_PLUGIN_ROOT}/skills/ux-review-one-persona-loop/scripts/decay_slope.py" "${CLAUDE_PROJECT_DIR}/.decay-visits.json"
 ```
 
-Use its output **verbatim** — do not recompute the slope. The script **gates by stopReason**: the
-slope is computed from **bored/explored sessions only** (the clean signal); `stuck` visits are
-excluded and listed in `rerunNeeded`; `budget_cut` visits are censored (a lower bound) and left out
-of the slope. If fewer than 2 clean sessions exist, `slope` is `null` — tell the user the run was
-inconclusive (mostly stuck/censored) and suggest re-running.
+Each visit object MUST carry `stopReason`, `interest`, `newScreens`, and `turns`. Use the script's
+output **verbatim** — do not recompute anything. It reports **two decay signals**, gated to
+bored/explored sessions only (`stuck` excluded + listed in `rerunNeeded`; `budget_cut` censored):
+
+- **`primaryBehavioral`** — slope of **newScreens** (distinct new screens found per visit). This is
+  the trustworthy signal: it is observed, not self-reported. Lead with it.
+- **`secondarySelfReport`** — slope of self-reported **interest**. Soft evidence only — the persona
+  was told to cool on repeat, so cross-check it against the behavioral slope, never quote it alone.
+
+Each slope comes with `stdErr`, `r2`, and a `significance` verdict (`declining` / `rising` / `flat`
+= indistinguishable from noise / `unpowered` = <3 clean points / `inconclusive` = <2). If the
+behavioral slope is `inconclusive`, tell the user the run couldn't measure decay (too few clean
+sessions) and suggest re-running.
 
 ## Report
 
-Give the user: the persona, the interest series across visits annotated with how each ended
-(e.g. `85(bored) → 72(explored) → [50 stuck, excluded] → 55(bored) → …`), the **decay slope** and
-its verdict, first→last drop, and the **stopReason breakdown** (how many bored/explored vs stuck vs
-budget_cut, and `cleanSessions` used for the slope). Call out any `rerunNeeded` (stuck) visits.
-Add one or two sentences of interpretation grounded in the per-visit summaries (what specifically
-made interest fade or hold — and whether later visits ended faster, which is decay showing as
-behavior). If `warnings` are present, surface them.
+Give the user: the persona, and BOTH series annotated with how each visit ended — newScreens
+(e.g. `2 → 1 → 1 → 1 → 0`) and interest (e.g. `78(explored) → 32(bored) → …`). Lead with the
+**behavioral decay** (primaryBehavioral slope ± stdErr, R², verdict); present the **self-reported
+interest** slope second and explicitly as softer evidence. Call out when the two **diverge** (e.g.
+interest crashes while newScreens only drifts — that gap is narrative, not observed decay). Then the
+**stopReason breakdown** (bored/explored vs stuck vs budget_cut, and `cleanSessions`), any
+`rerunNeeded` visits, and one or two sentences grounded in the per-visit summaries (what actually
+stopped being new). If `warnings` are present, surface them.

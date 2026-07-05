@@ -26,11 +26,17 @@ non-empty, show a small caveat that some persona scores were invalid.
 - **Aha highlights:** Collect the strongest aha-moments (highest impact, or shared).
 - **Predicted funnel:** From `predictedDropoff` and `retentionVerdict`, describe where users
   are most likely to leave and which personas are at risk.
-- **First-Run AX:** Take the **overall First-Run AX Score**, **per-dimension averages** (clarity,
-  coldStart, entryBarrier, firstTaskSuccess, ahaReached, explorationEfficiency), and
-  **weakest/strongest dimension** directly from the metrics JSON (`metrics.firstRunAX`) — already
-  computed. Present the weakest dimension as the biggest first-run risk. Add qualitative color
-  from the personas' `firstRunAX.notes`, but never change the numbers.
+- **First-Run AX (behavioral vs affective — keep them separate):** From `metrics.firstRunAX`, take
+  the **`behavioralScore`** (entryBarrier, firstTaskSuccess, explorationEfficiency — grounded in
+  observed browser behavior) and the **`affectiveScore`** (clarity, coldStart, ahaReached —
+  simulated feelings, softer evidence) and present them as **two separate numbers**, not one blend.
+  The `combinedScore` is legacy — show it small, if at all. Present the **weakest dimension** as the
+  biggest first-run risk. Add qualitative color from `firstRunAX.notes`, but never change numbers.
+- **Uncertainty (do not imply false precision):** Surface `metrics.firstRunAX.variance` —
+  `betweenPersonaSD` (how much personas disagree) and, if `runReliability.available`, the run-to-run
+  SD. If reliability is unavailable (k=1 per persona), state plainly that each score is a single
+  sample. Render every headline score with its spread (e.g. a ± band or a caption), and show
+  `metrics.caution[]` as visible caveats — never as fine print.
 - **Stop-reason gate (read this before trusting the scores):** `metrics.firstRunAX.stopReasons`
   breaks sessions into `done` / `budget_cut` / `stuck`. Only `done` sessions are clean first-value
   successes; `budget_cut` sessions are first-value **failures** (their value dims were capped low,
@@ -58,10 +64,13 @@ file to `${CLAUDE_PROJECT_DIR}/ux-report.html`. It must include:
 
 - A header: site URL, the goal pursued, persona count, and a prominent honesty note that these
   are **predicted heuristic** results, not measured user data.
-- A **First-Run AX Score** hero: the overall score (1–5, one decimal) shown prominently, with
-  a small breakdown of the six per-dimension averages (clarity, coldStart, entryBarrier,
-  firstTaskSuccess, ahaReached, explorationEfficiency) — e.g. a radar or a row of 1–5 meters —
-  and the weakest dimension called out as the top first-run risk.
+- A **First-Run AX** hero showing **two scores side by side**: **Behavioral** (grounded) and
+  **Affective** (predicted), each 1–5 with its spread/±band, and a note that behavioral is the
+  harder evidence. Break the six per-dimension averages into two visually distinct groups
+  (behavioral: entryBarrier, firstTaskSuccess, explorationEfficiency · affective: clarity,
+  coldStart, ahaReached) — e.g. two rows of 1–5 meters — with the weakest dimension called out as
+  the top first-run risk. If `runReliability.available` is false, caption the scores "single sample
+  per persona — illustrative, not exact."
 - A **Stop-reason gate** panel right next to the hero: the done / budget_cut / stuck counts
   (e.g. a small stacked bar), how many sessions were scored, and any personas flagged for re-run.
   Make clear that only `done` sessions are clean successes and `budget_cut` = first-value failure.
