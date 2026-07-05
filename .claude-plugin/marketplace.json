@@ -1,0 +1,13 @@
+{
+  "name": "tmp-ux",
+  "owner": {
+    "name": "SeungHyeon"
+  },
+  "plugins": [
+    {
+      "name": "tmp-ux",
+      "source": "./",
+      "description": "Persona-based automated UX walkthroughs. Diverse persona agents drive a real browser (Playwright) through your site and report aha-moments, pain points, and predicted friction as an interactive dashboard."
+    }
+  ]
+}

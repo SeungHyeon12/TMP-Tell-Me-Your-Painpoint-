@@ -6,24 +6,26 @@ argument-hint: <url> [--goal "reach first value"] [--personas novice,power,a11y,
 
 Orchestrate a persona-based UX review. User input: `$ARGUMENTS`
 
-# INTAKE — defaults run directly; only customization needs approval
+# INTAKE — always ask the goal (if not supplied); personas default without prompting
 
 Only the **url** is a hard prerequisite: if no URL is given, ask for it first and stop.
 
-**Default behavior is to just run.** If the user only gives a URL (or a URL plus `--goal`), run
-immediately with all 5 default personas and the goal below — do NOT block on a confirmation
-prompt. You only pause for explicit approval when the user adds a **custom** persona (Step 2.3).
-Never force a plain default run behind an `AskUserQuestion`.
+**Personas default without prompting; the goal is always confirmed.** If no `--goal` was supplied,
+you MUST ask the user for the goal first (Step 1) — that is the one mandatory prompt, never skip it.
+Personas, by contrast, default to all 5 with no prompt; you only pause for approval when the user
+adds a **custom** persona (Step 2.3).
 
-## Step 1 — Goal (always goal-oriented)
+## Step 1 — Goal (always goal-oriented; ALWAYS ask when not supplied)
 
 This is a **First-Run** evaluation: it measures whether personas **reach the product's first
 value**, not how long they wander. There is no free-exploration mode — always run to a goal.
 
-Use the user's `--goal` if given; otherwise default to **"reach the product's first meaningful
-value / core action"** and proceed. Only ask the user (via `AskUserQuestion`) if the request is
-genuinely ambiguous about what "first value" means for this site. Personas pursue the goal
-directly on a short budget (6–8 steps); wandering is treated as cost.
+If the user passed `--goal`, use it. **Otherwise you MUST ask the user (via `AskUserQuestion`)
+what concrete goal each persona should pursue, and wait for their answer before touching the
+browser — never silently assume a goal.** Offer the sensible default **"reach the product's first
+meaningful value / core action"** as an option they can accept, plus a couple of site-specific
+suggestions, but do not proceed until they have chosen or confirmed one. Personas then pursue the
+chosen goal directly on a short budget (6–8 steps); wandering is treated as cost.
 
 ## Step 2 — Personas: default to all 5, approve only customization
 

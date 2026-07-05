@@ -24,8 +24,9 @@ the product's first value) directly, on a short budget, and reports where they g
 way (Cognitive Walkthrough). There is no free-exploration mode — for first-run, wandering is cost,
 not signal. (Repeat-visit wandering *is* the signal for the separate decay loop below.)
 
-- **--goal** — what each persona tries to reach; defaults to "reach the product's first
-  meaningful value / core action".
+- **--goal** — what each persona tries to reach. If you omit it, the command asks you for one
+  first (offering "reach the product's first meaningful value / core action" as the default to
+  accept).
 - **--personas** — pick from the 5 defaults (`novice,power,a11y,mobile,skeptic`); default is all.
 - **--custom** — add your own persona; if it's vague, the plugin refines it and asks you to
   approve the line-up before running.
@@ -38,9 +39,9 @@ Example:
 
 ## How it works
 
-1. The `/ux-review` command parses your request. With just a URL it runs all 5 default personas
-   directly; if you add a **custom** persona it refines the profile and asks you to approve the
-   line-up before running.
+1. The `/ux-review` command parses your request. If you didn't pass `--goal`, it **always asks you
+   for the goal first** (the one required prompt). Personas default to all 5 with no prompt — unless
+   you add a **custom** one, which it refines and asks you to approve before running.
 2. Persona runners execute **one at a time** — they share a single Playwright browser — each
    returning a structured JSON verdict.
 3. A synthesizer merges cross-persona issues, ranks them by severity × reach, and builds the
