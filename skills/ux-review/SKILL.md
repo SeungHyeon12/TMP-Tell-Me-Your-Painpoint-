@@ -6,28 +6,50 @@ argument-hint: <url> [--mode freeroam|task] [--task "goal"] [--personas novice,p
 
 Orchestrate a persona-based UX review. User input: `$ARGUMENTS`
 
-## Parse the request
+# MANDATORY INTAKE — always run this first, never skip
 
-- **url** (required): the site to evaluate. If missing, ask for it and stop.
-- **--mode**: `freeroam` (default) or `task`.
-- **--task**: the goal string, required when mode is `task` (e.g. "complete signup").
-  If mode is `task` but no goal is given, ask for it before running.
-- **--personas**: comma list from the 5 defaults in
-  `${CLAUDE_PLUGIN_ROOT}/shared/default-personas.md`. Default = all five.
-- **--custom**: one or more free-text persona descriptions to add or use instead.
+**This skill ALWAYS begins with the two-step intake below.** Even if the user already passed
+`--mode`, `--task`, or `--personas` in their input, treat those only as pre-filled defaults —
+you must still explicitly confirm BOTH decisions with the user. **Do not open the browser,
+invoke any persona runner, or take any other action until the user has confirmed both Step 1
+and Step 2.** If you ever find yourself about to run a walkthrough without both confirmations,
+stop and return to this intake.
 
-## Handle custom personas (approval gate)
+Only the **url** is a hard prerequisite: if no URL is given, ask for it first and stop.
 
-If the user supplied custom personas: read them, and if any are thin or vague, **refine them**
-into full profiles in the same shape as the default-personas file (who / behavior / aha
-triggers / bad triggers). Then present the final persona line-up (defaults + refined customs)
-to the user and **wait for explicit approval** before running anything. Do not start the
-walkthroughs until the user confirms the persona set.
+## Step 1 — Mode: goal-driven or free exploration?
 
-## Confirm the plan
+Ask the user (use the `AskUserQuestion` tool) which mode to run, pre-selecting whatever the
+input implied:
 
-Briefly state: URL, mode (+ goal if task), and the persona line-up. Remind the user that
-results are **predicted heuristic** judgments, not measured user data. Then proceed.
+- **task (goal-driven)** — personas attempt a specific goal and report where they get stuck.
+  If they pick this, you MUST get the concrete goal (e.g. "complete signup", "find pricing")
+  before proceeding.
+- **freeroam (free exploration)** — personas explore with no goal and report general
+  impressions and friction.
+
+Do not assume a mode. Wait for the answer (and the goal, if task).
+
+## Step 2 — Personas: explain defaults, offer custom, get approval
+
+1. **Explain the default line-up.** Read `${CLAUDE_PLUGIN_ROOT}/shared/default-personas.md` and
+   present the 5 defaults to the user in one short line each:
+   novice (nervous first-timer) · power (impatient power user) · a11y (accessibility-dependent) ·
+   mobile (on-the-go phone user) · skeptic (trust/price-sensitive).
+2. **Ask** (use `AskUserQuestion`) whether they want: all 5 defaults, a subset, and/or to add
+   their own **custom persona(s)**.
+3. **If they add a custom persona:** read their description, and if it's thin or vague,
+   **refine it** into a full profile in the same shape as the default-personas file
+   (who / behavior / aha triggers / bad triggers). Then present the final persona line-up
+   (chosen defaults + refined customs) back to the user.
+4. **Get explicit approval of the final line-up.** Do not proceed until the user confirms it.
+   If they want changes, revise and re-confirm.
+
+## Confirm and go
+
+Once both steps are confirmed, briefly restate the plan (URL, mode + goal if task, final
+persona line-up) and remind the user that results are **predicted heuristic** judgments, not
+measured user data. Then proceed to run.
 
 ## Run the walkthroughs — SEQUENTIALLY
 
