@@ -1,0 +1,24 @@
+{
+  "product_url": "https://example.com",
+  "iterations": 7,
+  "max_steps_per_session": 8,
+  "_note": "One-persona interest-decay loop. iterations is HARD-CAPPED at 7. The loop runs for exactly ONE chosen persona. Edit / add personas freely; each needs id, persona, task_goal.",
+
+  "personas": [
+    {
+      "id": "busy_operator",
+      "persona": "바쁜 스타트업 실무자. 새 도구는 '내 시간을 아껴주는가'로만 판단한다. 처음엔 호기심에 눌러보지만, 같은 걸 반복해서 보면 빠르게 흥미를 잃는다.",
+      "task_goal": "이 제품으로 핵심 업무 하나를 실제로 끝낼 수 있는지 확인한다."
+    },
+    {
+      "id": "curious_explorer",
+      "persona": "탐색을 즐기는 파워유저. 구석구석 기능을 눌러보며 새로움을 찾는다. 새 것이 계속 나오면 오래 붙어 있지만, 볼 게 떨어지면 급격히 식는다.",
+      "task_goal": "이 제품이 얼마나 깊고 다양한 기능을 가졌는지 끝까지 파본다."
+    },
+    {
+      "id": "skeptical_first_timer",
+      "persona": "의심 많은 첫 사용자. 가입·설정 같은 진입 장벽에 예민하고, 가치가 빨리 안 보이면 이탈한다. 신뢰가 쌓여야만 흥미가 오른다.",
+      "task_goal": "가입/설정 없이 이 제품의 가치를 빠르게 확인할 수 있는지 본다."
+    }
+  ]
+}

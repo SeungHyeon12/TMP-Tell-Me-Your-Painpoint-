@@ -51,15 +51,33 @@ Example:
 ```
 .claude-plugin/plugin.json   # manifest
 .mcp.json                    # Playwright MCP server
-skills/ux-review/SKILL.md    # orchestrator skill (auto-invocable + /tmp-ux:ux-review)
+skills/
+  ux-review/SKILL.md               # orchestrator skill (auto-invocable + /tmp-ux:ux-review)
+  ux-review-one-persona-loop/      # single-persona interest-decay loop (up to 7 visits)
+    SKILL.md
 agents/
   ux-persona-runner.md       # generic single-persona walkthrough executor
   ux-synthesizer.md          # semantic synthesis + dashboard builder
+  ux-decay-runner.md         # one repeat-visit for the interest-decay loop
 scripts/
   aggregate.py               # deterministic score aggregation (Python, stdlib only)
+  decay_slope.py             # least-squares interest-decay slope (Python, stdlib only)
 shared/
   default-personas.md        # the 5 default persona profiles
   persona-protocol.md        # browsing protocol + output schema + scoring rubric
+  decay-personas.json        # persona set + config for the decay loop
+```
+
+## Interest-decay loop (`/tmp-ux:ux-review-one-persona-loop`)
+
+A second skill measures **repeat-visit decay** for a single persona: the same persona visits the
+site up to **7 times**, the browser is reset to a first-time visitor each visit, but the persona
+*remembers* how often it has been — so novelty wears off like a real user. It self-reports interest
+(0–100) each visit; `scripts/decay_slope.py` computes the least-squares **decay slope** (negative =
+interest fades on repeat). Two nested loops: outer over visits (≤ 7), inner over actions per visit.
+
+```
+/tmp-ux:ux-review-one-persona-loop https://example.com --persona busy_operator --iterations 7
 ```
 
 ### Scoring: LLM judges, code counts

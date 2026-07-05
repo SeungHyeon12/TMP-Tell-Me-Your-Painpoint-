@@ -14,6 +14,12 @@ import json
 import math
 import sys
 
+# Force UTF-8 stdout so non-ASCII (e.g. Korean persona ids) survive Windows' cp949 console.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except AttributeError:
+    pass
+
 DIMS = [
     "clarity",
     "coldStart",

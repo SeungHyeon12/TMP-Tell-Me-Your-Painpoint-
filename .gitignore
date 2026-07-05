@@ -1,3 +1,4 @@
 # Runtime artifacts produced by /tmp-ux:ux-review
 ux-report.html
 .ux-verdicts.json
+.decay-visits.json
