@@ -13,6 +13,32 @@ findings are synthesized into a single **interactive HTML dashboard**.
 > behavioral data from real users. Use it as a cheap pre-launch screening pass, not as a
 > replacement for real user testing.
 
+## Installation
+
+Claude Code installs plugins by adding a **marketplace source** and then installing from it — there
+is no central store to browse. This repo *is* the marketplace (it ships a `.claude-plugin/marketplace.json`).
+
+**From GitHub** (for anyone; the repo must be public):
+
+```
+/plugin marketplace add SeungHyeon12/TMP-Tell-Me-Your-Painpoint-
+/plugin install tmp-ux@tmp-ux
+/reload-plugins        # or restart Claude Code
+```
+
+**From a local clone** (for development):
+
+```
+/plugin marketplace add /path/to/this/repo
+/plugin install tmp-ux@tmp-ux
+```
+
+Or, to load it for a single session without installing: `claude --plugin-dir /path/to/this/repo`.
+
+After installing, verify with `/plugin list` (tmp-ux enabled) and `/mcp` (the bundled **playwright**
+server connected). On the first browser run, Playwright may need its browser binary — if so, run
+`npx playwright install chromium`. See **Requirements** below for Node.js / Python prerequisites.
+
 ## Usage
 
 ```
