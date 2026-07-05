@@ -2,3 +2,15 @@
 ux-report.html
 .ux-verdicts.json
 .decay-visits.json
+
+# Playwright MCP browsing artifacts + ad-hoc capture files from manual test runs
+.playwright-mcp/
+*-snapshot.md
+shopping-home.*
+shopping_home.*
+search-results.*
+search_results.*
+product-detail.*
+product_detail.*
+step1-home.*
+tab1-check.*
