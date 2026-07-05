@@ -16,10 +16,14 @@ narrative it was instructed to produce. So `interest` is treated as a SECONDARY,
 soft signal.
 
 The PRIMARY signal is behavioral and observed, not felt: `newScreens` — how many
-distinct new screens the persona actually found each visit. If a site truly has
-nothing new on return, newScreens falls whether or not the model "feels" bored.
-`turns` (actions taken before voluntarily leaving) is a TERTIARY behavioral signal
-(a bored visitor leaves faster).
+structurally-distinct new screens the persona actually reached each visit. When a
+visit carries `screenSignatures` (structural fingerprints captured in-browser via
+`browser_evaluate`), THIS script — not the model — counts how many are new versus
+everything seen on prior visits, so the number is observed rather than an impression;
+if signatures are absent it falls back to the persona's self-reported `newScreens`.
+If a site truly has nothing new on return, newScreens falls whether or not the model
+"feels" bored. `turns` (actions taken before voluntarily leaving) is a TERTIARY
+behavioral signal (a bored visitor leaves faster).
 
 Each slope is reported with a standard error and R^2 so the number carries its own
 uncertainty instead of pretending to be exact. The verdict leads with whether the
@@ -148,6 +152,8 @@ def main():
         warnings.append(f"received {len(visits)} visits; this loop is capped at 7")
 
     stop_counts = {"bored": 0, "explored": 0, "stuck": 0, "budget_cut": 0, "unknown": 0}
+    seen_sigs = set()          # cumulative structural fingerprints across all prior visits
+    sig_fallback_used = False
     series = []
     clean_interest = []     # (visit, interest)   secondary
     clean_screens = []      # (visit, newScreens) PRIMARY behavioral
@@ -169,13 +175,32 @@ def main():
         nsv = ns if valid_num(ns, 0, 10000) else None
         tn = v.get("turns")
         tnv = tn if valid_num(tn, 0, 10000) else None
+
+        # Authoritative newScreens: when the visit carries structural fingerprints, count how many
+        # are new versus everything seen on prior visits (objective); else fall back to self-report.
+        sigs = v.get("screenSignatures")
+        if isinstance(sigs, list) and sigs and all(isinstance(x, str) and x for x in sigs):
+            uniq = set(sigs)
+            ns_auth = len(uniq - seen_sigs)
+            seen_sigs |= uniq
+            ns_source = "dom-fingerprint"
+            if nsv is not None and abs(nsv - ns_auth) >= 2:
+                warnings.append(f"visit {i}: self-reported newScreens {nsv} diverges from "
+                                f"DOM-fingerprinted {ns_auth}; using the objective count")
+        else:
+            ns_auth = nsv
+            ns_source = "self-report"
+            if nsv is not None:
+                sig_fallback_used = True
+
         if ivv is None:
             warnings.append(f"visit {i}: interest missing or out of range (got {json.dumps(iv)})")
-        if nsv is None:
-            warnings.append(f"visit {i}: newScreens missing or out of range (got {json.dumps(ns)})")
+        if ns_auth is None:
+            warnings.append(f"visit {i}: newScreens unavailable (no screenSignatures and "
+                            f"self-reported newScreens invalid: {json.dumps(ns)})")
 
-        series.append({"visit": i, "interest": ivv, "newScreens": nsv,
-                       "turns": tnv, "stopReason": stop})
+        series.append({"visit": i, "interest": ivv, "newScreens": ns_auth,
+                       "newScreensSource": ns_source, "turns": tnv, "stopReason": stop})
 
         if v.get("completed") is True:
             completed_count += 1
@@ -187,10 +212,15 @@ def main():
         elif stop in CLEAN:
             if ivv is not None:
                 clean_interest.append((i, ivv))
-            if nsv is not None:
-                clean_screens.append((i, nsv))
+            if ns_auth is not None:
+                clean_screens.append((i, ns_auth))
             if tnv is not None:
                 clean_turns.append((i, tnv))
+
+    if sig_fallback_used:
+        warnings.append("some visits had no screenSignatures; their newScreens fell back to the "
+                        "persona's self-report (less objective) -- have the runner fingerprint each "
+                        "screen via browser_evaluate for a fully observed count")
 
     def build(points):
         if len(points) < 2:
@@ -226,7 +256,7 @@ def main():
         "completedCount": completed_count,
         "series": series,
         "primaryBehavioral": {
-            "metric": "newScreens (distinct new screens per visit)",
+            "metric": "newScreens (structurally-distinct new screens per visit; DOM-fingerprinted when available)",
             **primary,
             "verdict": behavioral_verdict(primary.get("significance", "inconclusive"), primary),
         },

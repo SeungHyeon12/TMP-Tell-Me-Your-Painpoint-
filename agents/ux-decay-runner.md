@@ -54,6 +54,30 @@ reason and record which one in `stopReason`:
 Prefer leaving voluntarily (`bored`/`explored`) — those are the clean signal. `stuck` and
 `budget_cut` are not interest signals.
 
+## Fingerprint each screen objectively (do NOT eyeball "new")
+
+`newScreens` must be an **observed** count, not your impression. On each distinct screen you land
+on, capture a structural fingerprint with `browser_evaluate` instead of judging novelty yourself:
+
+```js
+() => {
+  const parts = [];
+  document.querySelectorAll('h1,h2,h3,[role],button,a,input,textarea,select,label').forEach(el => {
+    const name = (el.getAttribute('aria-label') || el.textContent || el.getAttribute('placeholder') || '').trim().slice(0, 40);
+    parts.push(el.tagName + ':' + (el.getAttribute('role') || '') + ':' + name);
+  });
+  const s = location.pathname + '|' + parts.sort().join('~');
+  let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  return location.pathname + '#' + h.toString(16);
+}
+```
+
+Two identical screens produce the identical signature. Collect each distinct screen's signature
+into `screenSignatures` (dedupe within this visit). The loop's Python script — not you — counts how
+many are genuinely new versus everything you saw on **earlier** visits, so the same screen seen
+again across visits can't be miscounted as new. Still report your own `newScreens` estimate too; it
+is only a cross-check against the objective count.
+
 ## Return — ONLY this JSON
 
 ```json
@@ -63,7 +87,8 @@ Prefer leaving voluntarily (`bored`/`explored`) — those are the clean signal. 
   "interest": <0-100 integer: how interested you ACTUALLY were this visit>,
   "completed": <true|false: did you actually accomplish the task_goal this visit>,
   "turns": <how many actions you took before leaving>,
-  "newScreens": <how many distinct new screens you saw this visit>,
+  "newScreens": <your own estimate of distinct new screens this visit (cross-check only)>,
+  "screenSignatures": ["<one browser_evaluate fingerprint per distinct screen you reached>"],
   "summary": "<1-2 sentences: what you saw and WHY this interest score / why you left. Becomes next visit's memory.>"
 }
 ```

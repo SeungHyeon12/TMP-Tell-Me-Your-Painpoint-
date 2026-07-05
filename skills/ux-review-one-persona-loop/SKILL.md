@@ -1,6 +1,6 @@
 ---
 name: ux-review-one-persona-loop
-description: Measure how fast a single persona's interest decays on repeated exposure to a site. Runs ONE chosen persona through up to 7 repeat visits (fresh browser each time, persistent agent memory), self-reporting interest per visit, then computes the least-squares interest-decay slope. Use when the user wants to measure repeat-visit retention, novelty decay, cold-start staleness, or an interest-decay slope for one persona.
+description: Measure how fast a single persona's interest decays on repeated exposure to a site. Runs ONE chosen persona through up to 7 repeat visits (fresh browser each time, persistent agent memory) and fits a least-squares decay slope to two per-visit signals -- primarily the behavioral, in-browser-observed count of structurally-new screens found, and secondarily the persona's self-reported interest. Use when the user wants to measure repeat-visit retention, novelty decay, cold-start staleness, or an interest-decay slope for one persona.
 argument-hint: <url> [--persona busy_operator|curious_explorer|skeptical_first_timer|custom] [--iterations 1-7] [--goal "task goal"]
 ---
 
@@ -8,8 +8,9 @@ Run a single-persona interest-decay loop. User input: `$ARGUMENTS`
 
 This measures repeat-exposure decay: the same persona visits the site several times; the browser
 is reset to a first-time visitor each visit, but the persona **remembers** how many times it has
-been, so novelty wears off exactly like a real user. The output is a **decay slope** (negative =
-interest fades on repeat).
+been, so novelty wears off exactly like a real user. The output is a behavioral **decay slope** —
+new screens found per revisit, negative meaning the site stops surprising this persona — cross-checked
+against a softer self-reported-interest slope.
 
 # MANDATORY INTAKE — always run first, never skip
 
@@ -73,11 +74,11 @@ at `${CLAUDE_PROJECT_DIR}/.decay-visits.json`, then run:
 python "${CLAUDE_PLUGIN_ROOT}/skills/ux-review-one-persona-loop/scripts/decay_slope.py" "${CLAUDE_PROJECT_DIR}/.decay-visits.json"
 ```
 
-Each visit object MUST carry `stopReason`, `interest`, `newScreens`, and `turns`. Use the script's
+Each visit object MUST carry `stopReason`, `interest`, `newScreens`, `turns`, and `screenSignatures` (per-screen fingerprints the runner captured; the script counts new screens from them). Use the script's
 output **verbatim** — do not recompute anything. It reports **two decay signals**, gated to
 bored/explored sessions only (`stuck` excluded + listed in `rerunNeeded`; `budget_cut` censored):
 
-- **`primaryBehavioral`** — slope of **newScreens** (distinct new screens found per visit). This is
+- **`primaryBehavioral`** — slope of **newScreens** (structurally-distinct new screens per visit, counted in Python from the runner's in-browser fingerprints). This is
   the trustworthy signal: it is observed, not self-reported. Lead with it.
 - **`secondarySelfReport`** — slope of self-reported **interest**. Soft evidence only — the persona
   was told to cool on repeat, so cross-check it against the behavioral slope, never quote it alone.

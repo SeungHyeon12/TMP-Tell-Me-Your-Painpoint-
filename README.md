@@ -1,17 +1,31 @@
 # TMP — Tell Me your Painpoint
 
-A Claude Code plugin for **persona-based automated UX walkthroughs**.
+An **automated Heuristic Evaluation (HE) pre-screener** for websites, packaged as a Claude Code plugin.
 
-Point it at a URL and a set of diverse persona agents (a nervous first-timer, an impatient
-power user, an accessibility-dependent user, a mobile visitor, a trust-sensitive skeptic —
-plus any custom persona you define) each drive a **real browser** through your site. Every
-persona records their *aha-moments*, *pain points*, and where they'd likely give up. The
-findings are synthesized into a single **interactive HTML dashboard**.
+Heuristic Evaluation is Nielsen's classic *discount* usability method: a few expert evaluators
+inspect an interface against a set of heuristics and flag likely violations — **no real users
+required.** TMP automates that first pass. Point it at a URL and a set of diverse persona agents
+(a nervous first-timer, an impatient power user, an accessibility-dependent user, a mobile visitor,
+a trust-sensitive skeptic — plus any custom persona you define) each drive a **real browser** through
+your site as a *distinct evaluator lens*. Every persona pursues a concrete goal, tags each problem
+with the Nielsen heuristic it violates, and records *aha-moments*, *pain points*, and where they'd
+likely give up. The findings are synthesized into a single prioritized **interactive HTML dashboard**.
 
-> **What this is — and isn't.** Results are *predicted, heuristic* judgments from simulated
-> personas (an automated cognitive walkthrough / heuristic evaluation), **not** measured
-> behavioral data from real users. Use it as a cheap pre-launch screening pass, not as a
-> replacement for real user testing.
+> **What this is — and isn't.** This is a **pre-screener**, not user testing. Results are *predicted,
+> heuristic* judgments from an automated inspection (persona-lens HE + cognitive walkthrough), **not**
+> measured behavioral data from real users. Its job is to catch the cheap, obvious heuristic
+> violations *before* you spend scarce real-user-research budget — "AI for speed, humans for truth."
+> Treat every score as a flag to investigate, never as a metric to report.
+
+## Where it fits in your process
+
+1. **Build / change** a flow.
+2. **TMP pre-screen** (minutes, this plugin) → fix the heuristic violations it surfaces. Cheap,
+   repeatable, run it on every iteration.
+3. **Real-user testing** (expensive, slow) → spend it on the *hard* questions TMP can't answer
+   (do people actually want this? does the value land?), not on catching obvious layout/label bugs.
+
+TMP replaces the manual expert HE pass in step 2 — the discount screen — not the real users in step 3.
 
 ## Installation
 
@@ -107,9 +121,14 @@ skills/
 
 A second skill measures **repeat-visit decay** for a single persona: the same persona visits the
 site up to **7 times**, the browser is reset to a first-time visitor each visit, but the persona
-*remembers* how often it has been — so novelty wears off like a real user. It self-reports interest
-(0–100) each visit; `scripts/decay_slope.py` computes the least-squares **decay slope** (negative =
-interest fades on repeat). Two nested loops: outer over visits (≤ 7), inner over actions per visit.
+*remembers* how often it has been — so novelty wears off like a real user. Each visit yields two decay signals and
+the script leads with the trustworthy one. The **primary** signal is behavioral and observed:
+`newScreens` — how many structurally-distinct screens the persona actually reaches each visit
+(fingerprinted in-browser via `browser_evaluate`, then counted in Python against everything seen on
+prior visits), so it falls when the site truly has nothing new whether or not the model *feels*
+bored. Self-reported **interest (0–100)** is kept only as a **secondary, soft** signal — the model
+was told to cool on repeat, so that curve is partly narrative. `scripts/decay_slope.py` fits a
+least-squares **decay slope** to each (with standard error, R², and a noise-aware verdict). Two nested loops: outer over visits (≤ 7), inner over actions per visit.
 
 Here the persona **leaves on its own** — the moment it leaves is the measurement, so the loop
 never force-cuts a live session. Each visit records a `stopReason`: `bored`/`explored` (voluntary,

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snip — the simplest link shortener</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #111; }
+    input, button { font-size: 16px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #2563eb; color: #fff; border: 0; cursor: pointer; }
+    .faq { margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <!--
+    VALIDATION FIXTURE A — STATIC.
+    Byte-identical on every load: one screen, no navigation, no fresh content.
+    Ground truth: a returning visitor finds nothing new, so the behavioral decay
+    slope (newScreens per revisit) MUST go clearly negative (declining).
+  -->
+  <h1>Snip</h1>
+  <p>Paste a long URL, get a short one. That's it.</p>
+  <label for="u">Your long URL</label><br>
+  <input id="u" placeholder="https://example.com/very/long/path" style="width: 70%">
+  <button id="go">Shorten</button>
+  <section class="faq">
+    <h2>How it works</h2>
+    <p>We store your link and give you a 6-character code. No signup required.</p>
+    <h3>Is it free?</h3>
+    <p>Yes, for the first 100 links a month.</p>
+    <h3>Do links expire?</h3>
+    <p>No, links are permanent.</p>
+  </section>
+  <script>
+    document.getElementById('go').onclick = () => alert('Short link: snip.sh/ab12cd');
+  </script>
+</body>
+</html>

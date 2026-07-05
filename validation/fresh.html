@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DailyDesign — a new UX tip every visit</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #111; }
+    ul { line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <!--
+    VALIDATION FIXTURE B — FRESH.
+    Renders a genuinely different tip (distinct heading + list + link) on every load,
+    picked from a pool so each visit's structural fingerprint differs.
+    Ground truth: novelty renews each visit, so the behavioral decay slope MUST stay
+    FLAT (~0) or rise — clearly less negative than the static fixture.
+  -->
+  <h1>DailyDesign</h1>
+  <p>A fresh, genuinely different UX tip every time you drop by.</p>
+  <div id="tip"></div>
+  <script>
+    const TIPS = [
+      { t: 'Contrast is king', b: ['Aim for 4.5:1 on body text', 'Never gray-on-gray'], link: 'Read the WCAG contrast note' },
+      { t: 'Kill the modal', b: ['Interruptions cost trust', 'Prefer inline affordances'], link: 'When modals are OK' },
+      { t: 'Label every input', b: ['Placeholders are not labels', 'Bind label-for explicitly'], link: 'Accessible forms guide' },
+      { t: 'Reduce the click count', b: ['Every step sheds users', 'Collapse multi-page flows'], link: 'Funnel-shortening patterns' },
+      { t: 'Show system status', b: ['Spinners for >1s waits', 'Confirm every save'], link: 'Feedback timing rules' },
+      { t: 'Design the empty state', b: ['Blank screens stall users', 'Seed with examples'], link: 'Empty-state playbook' },
+      { t: 'Touch targets 44px', b: ['Thumbs are imprecise', 'Pad small icons'], link: 'Mobile hit-area specs' },
+      { t: 'Write for scanning', b: ['Front-load the verb', 'Bulletize dense prose'], link: 'Microcopy checklist' },
+      { t: 'Undo beats confirm', b: ['Let users act fast', 'Offer a 5s undo'], link: 'Reversible actions' },
+      { t: 'Respect the back button', b: ['Never trap history', 'Keep URLs meaningful'], link: 'Navigation hygiene' },
+      { t: 'One primary action', b: ['Many CTAs = no CTA', 'Demote the rest'], link: 'Visual hierarchy note' },
+      { t: 'Load the fold first', b: ['Defer below-fold assets', 'Value in <2s'], link: 'Perceived-speed tricks' }
+    ];
+    const pick = TIPS[Date.now() % TIPS.length];
+    document.getElementById('tip').innerHTML =
+      '<h2>' + pick.t + '</h2><ul>' + pick.b.map(x => '<li>' + x + '</li>').join('') +
+      '</ul><a href="#">' + pick.link + '</a>';
+  </script>
+</body>
+</html>
