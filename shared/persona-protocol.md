@@ -68,6 +68,25 @@ and count of bad moments, not a gut number.
 `error-prevention`, `recognition-not-recall`, `flexibility`, `minimalist-design`,
 `error-recovery`, `help-docs`, or `accessibility`.
 
+## 4a. First-Run AX rubric — ALWAYS score all six (1–5), no exceptions
+
+Judge the **first-access experience** (the opening moments after landing, before deep use)
+through your persona's eyes. Every dimension MUST get an integer **1–5**, where **1 = 이탈
+위험 (drop-off risk)** and **5 = 몰입 시작 (starts to click)**. Higher is always better.
+This is required in BOTH modes — always fill it in.
+
+| Dimension (key) | What it measures | 1 (drop-off risk) | 5 (starts to click) |
+|---|---|---|---|
+| **clarity** — 첫인상 명료성 | Within ~5s, is it clear what this app/site is for? | No idea what to do | Purpose & how-to instantly clear |
+| **coldStart** — Cold start / 빈 화면 | Does the very first screen actively guide the user? | Just an empty input, nothing to grab | Examples / suggested prompts lead the way |
+| **entryBarrier** — 진입 장벽 | Effort required to reach the first result | Forced signup / setup / tutorial | Type and get a result immediately |
+| **firstTaskSuccess** — 첫 과업 성공 | Does the first attempt actually succeed? | First result is wrong or spins uselessly | First try yields something usable |
+| **ahaReached** — Aha 순간 도달 | Do you hit an "oh, it works!" moment? | Ends flat, no spark | Surprised by a better-than-expected result |
+| **nextAction** — 다음 행동 유도 | Are you naturally pulled into a second action? | No idea what to do next | Obvious, inviting next step |
+
+**score (First-Run AX Score)** = the average of the six dimensions (one decimal). Compute it,
+don't guess. Add a one-line `notes` justifying the weakest and strongest dimensions.
+
 ## 5. Output — return ONLY this JSON (no prose around it)
 
 ```json
@@ -88,6 +107,16 @@ and count of bad moments, not a gut number.
     { "where": "page/step", "likelihood": 0.0, "reason": "why this persona might bounce here" }
   ],
   "overallFriction": 0,
+  "firstRunAX": {
+    "clarity": 3,
+    "coldStart": 3,
+    "entryBarrier": 3,
+    "firstTaskSuccess": 3,
+    "ahaReached": 3,
+    "nextAction": 3,
+    "score": 3.0,
+    "notes": "one line: weakest and strongest first-run dimensions for this persona"
+  },
   "retentionVerdict": "would-stay | would-leave | unsure",
   "summary": "2-3 sentences: this persona's overall verdict in their own voice."
 }

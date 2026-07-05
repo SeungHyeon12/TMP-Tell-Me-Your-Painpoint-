@@ -53,8 +53,18 @@ Example:
 skills/ux-review/SKILL.md    # orchestrator skill (auto-invocable + /tmp-ux:ux-review)
 agents/
   ux-persona-runner.md       # generic single-persona walkthrough executor
-  ux-synthesizer.md          # aggregation + dashboard builder
+  ux-synthesizer.md          # semantic synthesis + dashboard builder
+scripts/
+  aggregate.js               # deterministic score aggregation (Node, no extra deps)
 shared/
   default-personas.md        # the 5 default persona profiles
   persona-protocol.md        # browsing protocol + output schema + scoring rubric
 ```
+
+### Scoring: LLM judges, code counts
+
+Each persona returns raw 1–5 scores (including the six **First-Run AX** dimensions). The exact
+aggregation — First-Run AX Score, per-dimension averages, friction, retention — is done by
+`scripts/aggregate.js` (Node, already available via the Playwright/npx dependency), so the
+numbers are exact and reproducible rather than eyeballed by the model. The model does the
+judgment; the script does the arithmetic.

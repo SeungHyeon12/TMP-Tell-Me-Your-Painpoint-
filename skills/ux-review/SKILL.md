@@ -68,13 +68,28 @@ verdict. Collect each returned JSON object.
 
 If a runner returns malformed JSON or dies, note it and continue with the remaining personas.
 
+## Aggregate the scores — deterministic (do NOT do this math yourself)
+
+Once all personas are done, write the collected array of verdict JSON objects to a temp file
+(e.g. `${CLAUDE_PROJECT_DIR}/.ux-verdicts.json`) and run:
+
+```
+node "${CLAUDE_PLUGIN_ROOT}/scripts/aggregate.js" "${CLAUDE_PROJECT_DIR}/.ux-verdicts.json"
+```
+
+This prints an exact metrics JSON (overall First-Run AX Score, per-dimension averages, weakest
+dimension, friction average, retention counts). **Use these numbers verbatim** — never recompute
+averages by hand. If the output contains `warnings`, surface them (a persona returned an invalid
+or missing score) but continue.
+
 ## Synthesize and publish
 
-Once all personas are done, invoke the `tmp-ux:ux-synthesizer` agent with the array of
-per-persona JSON verdicts plus the url and mode. It writes an interactive dashboard to
-`${CLAUDE_PROJECT_DIR}/ux-report.html` and returns a summary.
+Invoke the `tmp-ux:ux-synthesizer` agent with (a) the array of per-persona verdicts, (b) the
+precomputed metrics JSON from the aggregate script, and (c) the url and mode. It writes an
+interactive dashboard to `${CLAUDE_PROJECT_DIR}/ux-report.html` and returns a summary.
 
 Then publish that file with the **Artifact** tool so the user gets a shareable dashboard.
 
-Finally, give the user a short text recap: the headline verdict, the top 3 issues (severity +
-affected personas + fix), and the strongest aha-moment. Point them to the dashboard for detail.
+Finally, give the user a short text recap: the **First-Run AX Score** (1–5) with its weakest
+dimension, the headline verdict, the top 3 issues (severity + affected personas + fix), and the
+strongest aha-moment. Point them to the dashboard for detail.
