@@ -3,7 +3,7 @@
 
 Usage:  python aggregate.py <verdicts.json>
   <verdicts.json> is either an array of persona verdict objects, or an object
-  shaped { "url", "mode", "personas": [ ...verdicts ] }.
+  shaped { "url", "goal", "personas": [ ...verdicts ] }.
 
 Prints a metrics JSON to stdout. All arithmetic (First-Run AX Score, per-dimension
 averages, friction, retention counts) is computed here so the numbers are exact and

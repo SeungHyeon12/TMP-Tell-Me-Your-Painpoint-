@@ -6,7 +6,8 @@ model: sonnet
 
 You receive (a) an array of per-persona verdict JSON objects (each from a `ux-persona-runner`),
 (b) a **precomputed metrics JSON** from the `aggregate.py` script, and (c) the target URL and
-mode. Your job is to synthesize them and produce an interactive HTML dashboard file.
+the goal each persona pursued. Your job is to synthesize them and produce an interactive HTML
+dashboard file.
 
 **All numeric aggregates are already computed for you in the metrics JSON** — overall First-Run
 AX Score, per-dimension averages, weakest/strongest dimension, friction average, retention
@@ -48,8 +49,8 @@ non-empty, show a small caveat that some persona scores were invalid.
 Load the `artifact-design` skill for calibration, then write a single self-contained HTML
 file to `${CLAUDE_PROJECT_DIR}/ux-report.html`. It must include:
 
-- A header: site URL, mode, persona count, and a prominent honesty note that these are
-  **predicted heuristic** results, not measured user data.
+- A header: site URL, the goal pursued, persona count, and a prominent honesty note that these
+  are **predicted heuristic** results, not measured user data.
 - A **First-Run AX Score** hero: the overall score (1–5, one decimal) shown prominently, with
   a small breakdown of the six per-dimension averages (clarity, coldStart, entryBarrier,
   firstTaskSuccess, ahaReached, nextAction) — e.g. a radar or a row of 1–5 meters — and the

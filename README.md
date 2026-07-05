@@ -16,12 +16,16 @@ findings are synthesized into a single **interactive HTML dashboard**.
 ## Usage
 
 ```
-/tmp-ux:ux-review <url> [--mode freeroam|task] [--task "goal"] [--personas ...] [--custom "..."]
+/tmp-ux:ux-review <url> [--goal "reach first value"] [--personas ...] [--custom "..."]
 ```
 
-- **freeroam** — personas explore with no goal and report general impressions & friction.
-- **task** — personas attempt a concrete goal (e.g. "complete signup") and report where they
-  get stuck (Cognitive Walkthrough).
+This is a **goal-oriented First-Run** evaluation: each persona pursues a concrete goal (reaching
+the product's first value) directly, on a short budget, and reports where they get stuck on the
+way (Cognitive Walkthrough). There is no free-exploration mode — for first-run, wandering is cost,
+not signal. (Repeat-visit wandering *is* the signal for the separate decay loop below.)
+
+- **--goal** — what each persona tries to reach; defaults to "reach the product's first
+  meaningful value / core action".
 - **--personas** — pick from the 5 defaults (`novice,power,a11y,mobile,skeptic`); default is all.
 - **--custom** — add your own persona; if it's vague, the plugin refines it and asks you to
   approve the line-up before running.
@@ -29,7 +33,7 @@ findings are synthesized into a single **interactive HTML dashboard**.
 Example:
 
 ```
-/tmp-ux:ux-review https://example.com --mode task --task "find and start the free trial"
+/tmp-ux:ux-review https://example.com --goal "find and start the free trial"
 ```
 
 ## How it works

@@ -28,17 +28,18 @@ Capture a screenshot at each meaningful step so your observations are grounded i
 was actually rendered. Screenshots are for YOUR analysis; the final dashboard uses your
 derived notes, not embedded images.
 
-## 2. Two modes
+## 2. Goal-oriented, short budget (always)
 
-**freeroam** — You have no assigned goal. Land on the URL and behave like your persona
-naturally would: form a first impression, follow whatever draws your attention, poke at
-2–5 things, and notice where you get delighted or confused. Explore 5–8 steps.
+This is a **First-Run** evaluation: what we measure is whether the persona **reaches the
+product's first value** — not how long they wander. Wandering here is not signal, it is cost.
 
-**task** — You are given a concrete goal (e.g. "sign up for an account", "find the price").
-Attempt it end-to-end like your persona would. Record every point where you hesitate,
-backtrack, misread, or get blocked. This is a Cognitive Walkthrough: at each step ask
-"Would this persona know what to do next? Would they notice the right control? Would they
-understand the feedback after acting?"
+You are given a concrete **goal** (e.g. "reach the core action", "sign up", "find the price").
+Pursue it **directly, on a short budget — at most ~5 steps.** Do not free-roam or poke around
+for its own sake; every step should move toward the goal or reveal a blocker on the way to it.
+
+Run it as a Cognitive Walkthrough: at each step ask "Would this persona know what to do next?
+Would they notice the right control? Would they understand the feedback after acting?" Record
+every point where they hesitate, backtrack, misread, or get blocked before reaching first value.
 
 ## 3. Staying in character
 
@@ -92,8 +93,7 @@ don't guess. Add a one-line `notes` justifying the weakest and strongest dimensi
 ```json
 {
   "persona": { "id": "novice", "name": "...", "archetype": "..." },
-  "mode": "freeroam | task",
-  "task": "the goal string, or null in freeroam",
+  "goal": "the concrete goal pursued this run",
   "journey": [
     { "step": 1, "url": "...", "action": "what I did", "observation": "what I saw/felt, in character" }
   ],

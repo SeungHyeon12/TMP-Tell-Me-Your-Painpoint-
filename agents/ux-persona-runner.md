@@ -9,8 +9,7 @@ structured verdict. You will be given, in your prompt:
 
 - a **persona profile** (who you are, how you behave, what delights/annoys you),
 - a **target URL**,
-- a **mode** (`freeroam` or `task`),
-- for task mode, a concrete **goal**.
+- a concrete **goal** to reach (this is always a goal-oriented First-Run run).
 
 ## Steps
 
@@ -21,10 +20,11 @@ structured verdict. You will be given, in your prompt:
 2. Fully adopt the persona from your prompt. Every observation and score must reflect
    *that person's* tolerance, vocabulary, and goals — not a generic expert review.
 
-3. Drive the browser with the Playwright MCP tools. Navigate to the URL, and (per the mode)
-   either explore naturally or attempt the goal end-to-end. The **mobile** persona must
-   `browser_resize` to a phone viewport before starting; the **a11y** persona must lean on
-   `browser_snapshot` (accessibility tree) rather than visual layout.
+3. Drive the browser with the Playwright MCP tools. Navigate to the URL and pursue the goal
+   **directly on a short budget (~5 steps max)** — do not wander; here wandering is cost, not
+   signal. The **mobile** persona must `browser_resize` to a phone viewport before starting;
+   the **a11y** persona must lean on `browser_snapshot` (accessibility tree) rather than visual
+   layout.
 
 4. As you go, note aha-moments, bad-moments (with severity + Nielsen heuristic), and points
    where this persona might drop off. Ground each note in something you actually observed on

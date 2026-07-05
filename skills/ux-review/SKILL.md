@@ -1,7 +1,7 @@
 ---
 name: ux-review
-description: Run a persona-based automated UX walkthrough of a website. Diverse persona agents drive a real browser through the site and their findings (aha-moments, pain points, predicted friction) are synthesized into an interactive dashboard. Use when the user wants to evaluate or review a website's UX/usability, find pain points or friction, do a heuristic evaluation or cognitive walkthrough, or test a site with user personas.
-argument-hint: <url> [--mode freeroam|task] [--task "goal"] [--personas novice,power,a11y,mobile,skeptic] [--custom "persona description"]
+description: Run a goal-oriented, persona-based First-Run UX evaluation of a website. Diverse persona agents each pursue a concrete goal (reaching the product's first value) on a short budget via a real browser, and their findings (aha-moments, pain points, predicted friction, First-Run AX score) are synthesized into an interactive dashboard. Use when the user wants to evaluate a site's first-run experience, whether users reach first value, find onboarding pain points or friction, do a cognitive walkthrough, or test a site with user personas.
+argument-hint: <url> [--goal "reach first value"] [--personas novice,power,a11y,mobile,skeptic] [--custom "persona description"]
 ---
 
 Orchestrate a persona-based UX review. User input: `$ARGUMENTS`
@@ -9,26 +9,23 @@ Orchestrate a persona-based UX review. User input: `$ARGUMENTS`
 # MANDATORY INTAKE — always run this first, never skip
 
 **This skill ALWAYS begins with the two-step intake below.** Even if the user already passed
-`--mode`, `--task`, or `--personas` in their input, treat those only as pre-filled defaults —
-you must still explicitly confirm BOTH decisions with the user. **Do not open the browser,
-invoke any persona runner, or take any other action until the user has confirmed both Step 1
-and Step 2.** If you ever find yourself about to run a walkthrough without both confirmations,
-stop and return to this intake.
+`--goal` or `--personas` in their input, treat those only as pre-filled defaults — you must
+still explicitly confirm BOTH decisions with the user. **Do not open the browser, invoke any
+persona runner, or take any other action until the user has confirmed both Step 1 and Step 2.**
+If you ever find yourself about to run a walkthrough without both confirmations, stop and return
+to this intake.
 
 Only the **url** is a hard prerequisite: if no URL is given, ask for it first and stop.
 
-## Step 1 — Mode: goal-driven or free exploration?
+## Step 1 — Goal (this run is always goal-oriented)
 
-Ask the user (use the `AskUserQuestion` tool) which mode to run, pre-selecting whatever the
-input implied:
+This is a **First-Run** evaluation: it measures whether personas **reach the product's first
+value**, not how long they wander. So there is no free-exploration mode — always run to a goal.
 
-- **task (goal-driven)** — personas attempt a specific goal and report where they get stuck.
-  If they pick this, you MUST get the concrete goal (e.g. "complete signup", "find pricing")
-  before proceeding.
-- **freeroam (free exploration)** — personas explore with no goal and report general
-  impressions and friction.
-
-Do not assume a mode. Wait for the answer (and the goal, if task).
+Ask the user (use the `AskUserQuestion` tool) for the concrete goal each persona should pursue
+(e.g. "reach the core action", "complete signup", "find pricing"). Offer a sensible default of
+**"reach the product's first meaningful value / core action"** and let them accept or replace it.
+Personas pursue this goal directly on a short budget (~5 steps); wandering is treated as cost.
 
 ## Step 2 — Personas: explain defaults, offer custom, get approval
 
@@ -47,9 +44,9 @@ Do not assume a mode. Wait for the answer (and the goal, if task).
 
 ## Confirm and go
 
-Once both steps are confirmed, briefly restate the plan (URL, mode + goal if task, final
-persona line-up) and remind the user that results are **predicted heuristic** judgments, not
-measured user data. Then proceed to run.
+Once both steps are confirmed, briefly restate the plan (URL, the goal, final persona line-up)
+and remind the user that results are **predicted heuristic** judgments, not measured user data.
+Then proceed to run.
 
 ## Run the walkthroughs — SEQUENTIALLY
 
@@ -60,11 +57,10 @@ starting the next. Never launch persona runners in parallel.
 Pass each runner:
 - the full persona profile block (from default-personas.md, or the approved custom profile),
 - the target url,
-- the mode,
-- the goal (task mode only),
+- the confirmed goal,
 
-and ask it to follow `${CLAUDE_PLUGIN_ROOT}/shared/persona-protocol.md` and return its JSON
-verdict. Collect each returned JSON object.
+and ask it to follow `${CLAUDE_PLUGIN_ROOT}/shared/persona-protocol.md` (goal-oriented, short
+budget) and return its JSON verdict. Collect each returned JSON object.
 
 If a runner returns malformed JSON or dies, note it and continue with the remaining personas.
 
@@ -85,7 +81,7 @@ or missing score) but continue.
 ## Synthesize and publish
 
 Invoke the `tmp-ux:ux-synthesizer` agent with (a) the array of per-persona verdicts, (b) the
-precomputed metrics JSON from the aggregate script, and (c) the url and mode. It writes an
+precomputed metrics JSON from the aggregate script, and (c) the url and goal. It writes an
 interactive dashboard to `${CLAUDE_PROJECT_DIR}/ux-report.html` and returns a summary.
 
 Then publish that file with the **Artifact** tool so the user gets a shareable dashboard.
