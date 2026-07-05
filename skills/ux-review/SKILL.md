@@ -6,47 +6,44 @@ argument-hint: <url> [--goal "reach first value"] [--personas novice,power,a11y,
 
 Orchestrate a persona-based UX review. User input: `$ARGUMENTS`
 
-# MANDATORY INTAKE — always run this first, never skip
-
-**This skill ALWAYS begins with the two-step intake below.** Even if the user already passed
-`--goal` or `--personas` in their input, treat those only as pre-filled defaults — you must
-still explicitly confirm BOTH decisions with the user. **Do not open the browser, invoke any
-persona runner, or take any other action until the user has confirmed both Step 1 and Step 2.**
-If you ever find yourself about to run a walkthrough without both confirmations, stop and return
-to this intake.
+# INTAKE — defaults run directly; only customization needs approval
 
 Only the **url** is a hard prerequisite: if no URL is given, ask for it first and stop.
 
-## Step 1 — Goal (this run is always goal-oriented)
+**Default behavior is to just run.** If the user only gives a URL (or a URL plus `--goal`), run
+immediately with all 5 default personas and the goal below — do NOT block on a confirmation
+prompt. You only pause for explicit approval when the user adds a **custom** persona (Step 2.3).
+Never force a plain default run behind an `AskUserQuestion`.
+
+## Step 1 — Goal (always goal-oriented)
 
 This is a **First-Run** evaluation: it measures whether personas **reach the product's first
-value**, not how long they wander. So there is no free-exploration mode — always run to a goal.
+value**, not how long they wander. There is no free-exploration mode — always run to a goal.
 
-Ask the user (use the `AskUserQuestion` tool) for the concrete goal each persona should pursue
-(e.g. "reach the core action", "complete signup", "find pricing"). Offer a sensible default of
-**"reach the product's first meaningful value / core action"** and let them accept or replace it.
-Personas pursue this goal directly on a short budget (~5 steps); wandering is treated as cost.
+Use the user's `--goal` if given; otherwise default to **"reach the product's first meaningful
+value / core action"** and proceed. Only ask the user (via `AskUserQuestion`) if the request is
+genuinely ambiguous about what "first value" means for this site. Personas pursue the goal
+directly on a short budget (6–8 steps); wandering is treated as cost.
 
-## Step 2 — Personas: explain defaults, offer custom, get approval
+## Step 2 — Personas: default to all 5, approve only customization
 
-1. **Explain the default line-up.** Read `${CLAUDE_PLUGIN_ROOT}/skills/ux-review/shared/default-personas.md` and
-   present the 5 defaults to the user in one short line each:
+1. **Default line-up is all 5** (from `${CLAUDE_PLUGIN_ROOT}/skills/ux-review/shared/default-personas.md`):
    novice (nervous first-timer) · power (impatient power user) · a11y (accessibility-dependent) ·
-   mobile (on-the-go phone user) · skeptic (trust/price-sensitive).
-2. **Ask** (use `AskUserQuestion`) whether they want: all 5 defaults, a subset, and/or to add
-   their own **custom persona(s)**.
-3. **If they add a custom persona:** read their description, and if it's thin or vague,
+   mobile (on-the-go phone user) · skeptic (trust/price-sensitive). If the user did not ask to
+   customize personas, run all 5 as-is — do not prompt.
+2. **If the user picked a subset** (via `--personas` or in their request), run exactly that subset.
+3. **If the user adds a custom persona:** read their description, and if it's thin or vague,
    **refine it** into a full profile in the same shape as the default-personas file
    (who / behavior / aha triggers / bad triggers). Then present the final persona line-up
-   (chosen defaults + refined customs) back to the user.
-4. **Get explicit approval of the final line-up.** Do not proceed until the user confirms it.
-   If they want changes, revise and re-confirm.
+   (chosen defaults + refined customs) back to the user and **get explicit approval before
+   running.** If they want changes, revise and re-confirm.
 
 ## Confirm and go
 
-Once both steps are confirmed, briefly restate the plan (URL, the goal, final persona line-up)
-and remind the user that results are **predicted heuristic** judgments, not measured user data.
-Then proceed to run.
+Briefly restate the plan (URL, the goal, final persona line-up) and remind the user that results
+are **predicted heuristic** judgments, not measured user data. For a plain default run this is a
+one-line heads-up, not a blocking question; for a custom line-up, proceed only after the approval
+in Step 2.3. Then run.
 
 ## Run the walkthroughs — SEQUENTIALLY
 

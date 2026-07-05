@@ -38,7 +38,9 @@ Example:
 
 ## How it works
 
-1. The `/ux-review` command parses your request and (for custom personas) gets your approval.
+1. The `/ux-review` command parses your request. With just a URL it runs all 5 default personas
+   directly; if you add a **custom** persona it refines the profile and asks you to approve the
+   line-up before running.
 2. Persona runners execute **one at a time** — they share a single Playwright browser — each
    returning a structured JSON verdict.
 3. A synthesizer merges cross-persona issues, ranks them by severity × reach, and builds the
