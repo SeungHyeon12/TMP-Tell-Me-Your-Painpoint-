@@ -44,6 +44,7 @@ Example:
 
 - The bundled **Playwright MCP** server (`npx @playwright/mcp@latest`) — starts automatically
   when the plugin is enabled. Node.js / npx must be available on your machine.
+- **Python 3** on your `PATH` (standard library only) — used to aggregate persona scores.
 
 ## Project layout
 
@@ -55,7 +56,7 @@ agents/
   ux-persona-runner.md       # generic single-persona walkthrough executor
   ux-synthesizer.md          # semantic synthesis + dashboard builder
 scripts/
-  aggregate.js               # deterministic score aggregation (Node, no extra deps)
+  aggregate.py               # deterministic score aggregation (Python, stdlib only)
 shared/
   default-personas.md        # the 5 default persona profiles
   persona-protocol.md        # browsing protocol + output schema + scoring rubric
@@ -65,6 +66,6 @@ shared/
 
 Each persona returns raw 1–5 scores (including the six **First-Run AX** dimensions). The exact
 aggregation — First-Run AX Score, per-dimension averages, friction, retention — is done by
-`scripts/aggregate.js` (Node, already available via the Playwright/npx dependency), so the
-numbers are exact and reproducible rather than eyeballed by the model. The model does the
-judgment; the script does the arithmetic.
+`scripts/aggregate.py` (Python standard library only), so the numbers are exact and
+reproducible rather than eyeballed by the model. The model does the judgment; the script does
+the arithmetic.

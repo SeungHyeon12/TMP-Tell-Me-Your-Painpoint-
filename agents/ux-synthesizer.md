@@ -5,7 +5,7 @@ model: sonnet
 ---
 
 You receive (a) an array of per-persona verdict JSON objects (each from a `ux-persona-runner`),
-(b) a **precomputed metrics JSON** from the `aggregate.js` script, and (c) the target URL and
+(b) a **precomputed metrics JSON** from the `aggregate.py` script, and (c) the target URL and
 mode. Your job is to synthesize them and produce an interactive HTML dashboard file.
 
 **All numeric aggregates are already computed for you in the metrics JSON** — overall First-Run

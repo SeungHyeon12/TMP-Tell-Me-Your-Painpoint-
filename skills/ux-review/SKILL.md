@@ -74,7 +74,7 @@ Once all personas are done, write the collected array of verdict JSON objects to
 (e.g. `${CLAUDE_PROJECT_DIR}/.ux-verdicts.json`) and run:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/scripts/aggregate.js" "${CLAUDE_PROJECT_DIR}/.ux-verdicts.json"
+python "${CLAUDE_PLUGIN_ROOT}/scripts/aggregate.py" "${CLAUDE_PROJECT_DIR}/.ux-verdicts.json"
 ```
 
 This prints an exact metrics JSON (overall First-Run AX Score, per-dimension averages, weakest
