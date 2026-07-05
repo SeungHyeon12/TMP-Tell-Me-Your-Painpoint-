@@ -1,0 +1,13 @@
+{
+  "name": "tmp-ux",
+  "displayName": "TMP — Tell Me your Painpoint",
+  "version": "0.1.0",
+  "description": "Persona-based automated UX walkthroughs. Diverse persona agents drive a real browser (Playwright) through your site and report aha-moments, pain points, and predicted friction as an interactive dashboard.",
+  "author": {
+    "name": "SeungHyeon"
+  },
+  "repository": "https://github.com/SeungHyeon12/TMP-Tell-Me-Your-Painpoint-",
+  "license": "MIT",
+  "keywords": ["ux", "usability", "heuristic-evaluation", "cognitive-walkthrough", "playwright", "personas"],
+  "mcpServers": "./.mcp.json"
+}
