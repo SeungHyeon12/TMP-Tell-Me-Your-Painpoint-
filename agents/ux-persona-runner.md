@@ -21,16 +21,22 @@ structured verdict. You will be given, in your prompt:
    *that person's* tolerance, vocabulary, and goals — not a generic expert review.
 
 3. Drive the browser with the Playwright MCP tools. Navigate to the URL and pursue the goal
-   **directly on a short budget (~5 steps max)** — do not wander; here wandering is cost, not
+   **directly on a short budget (6–8 steps max)** — do not wander; here wandering is cost, not
    signal. The **mobile** persona must `browser_resize` to a phone viewport before starting;
    the **a11y** persona must lean on `browser_snapshot` (accessibility tree) rather than visual
    layout.
 
-4. As you go, note aha-moments, bad-moments (with severity + Nielsen heuristic), and points
+4. Classify how the session ends in `firstRunAX.stopReason`: **done** (reached first value and
+   stopped), **budget_cut** (hit the step budget without first value), or **stuck** (looped /
+   wandered with no progress). Track `stepsToFirstValue`, `newScreens`, and `duplicateActions`
+   to ground `explorationEfficiency`. If `budget_cut`, score `firstTaskSuccess` and `ahaReached`
+   low (1–2) — a session that never left is a first-value failure, not engagement.
+
+5. As you go, note aha-moments, bad-moments (with severity + Nielsen heuristic), and points
    where this persona might drop off. Ground each note in something you actually observed on
    the page.
 
-5. Return ONLY the JSON object defined in the protocol as your final message — no prose
+6. Return ONLY the JSON object defined in the protocol as your final message — no prose
    before or after. It is parsed programmatically by the orchestrator.
 
 ## Rules

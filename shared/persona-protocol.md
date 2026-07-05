@@ -34,12 +34,17 @@ This is a **First-Run** evaluation: what we measure is whether the persona **rea
 product's first value** — not how long they wander. Wandering here is not signal, it is cost.
 
 You are given a concrete **goal** (e.g. "reach the core action", "sign up", "find the price").
-Pursue it **directly, on a short budget — at most ~5 steps.** Do not free-roam or poke around
+Pursue it **directly, on a short budget — 6–8 steps maximum.** Do not free-roam or poke around
 for its own sake; every step should move toward the goal or reveal a blocker on the way to it.
 
 Run it as a Cognitive Walkthrough: at each step ask "Would this persona know what to do next?
 Would they notice the right control? Would they understand the feedback after acting?" Record
 every point where they hesitate, backtrack, misread, or get blocked before reaching first value.
+
+Track how the session ends — this drives scoring (see §4a): **done** (reached first value and
+stopped), **budget_cut** (hit the step budget without first value), or **stuck** (looped/wandered
+with no progress). Also track steps-to-first-value, how many distinct new screens you saw, and any
+repeated/looping actions — these feed exploration efficiency.
 
 ## 3. Staying in character
 
@@ -69,24 +74,39 @@ and count of bad moments, not a gut number.
 `error-prevention`, `recognition-not-recall`, `flexibility`, `minimalist-design`,
 `error-recovery`, `help-docs`, or `accessibility`.
 
-## 4a. First-Run AX rubric — ALWAYS score all six (1–5), no exceptions
+## 4a. First-Run AX rubric — score within the short budget, gated by how you exited
 
-Judge the **first-access experience** (the opening moments after landing, before deep use)
-through your persona's eyes. Every dimension MUST get an integer **1–5**, where **1 = 이탈
-위험 (drop-off risk)** and **5 = 몰입 시작 (starts to click)**. Higher is always better.
-This is required in BOTH modes — always fill it in.
+Judge the **first-access experience** through your persona's eyes, always **within the 6–8 step
+budget**. Every dimension below MUST get an integer **1–5**, where **1 = 이탈 위험 (drop-off
+risk)** and **5 = 몰입 시작 (starts to click)**. Higher is always better.
 
-| Dimension (key) | What it measures | 1 (drop-off risk) | 5 (starts to click) |
+First set **stopReason** — how this single session actually ended:
+
+- **done** — you reached / confirmed the product's first value and chose to stop. ✅ Normal.
+- **budget_cut** — you hit the step budget WITHOUT reaching first value. This is a first-value
+  **failure**, not immersion. Score `firstTaskSuccess` and `ahaReached` LOW (1–2) — do not read
+  "still going" as engagement.
+- **stuck** — you looped / wandered with no progress. This session's data is contaminated; say so
+  in `notes` (it will be excluded or re-run).
+
+Then score the six experiential dimensions (all within budget):
+
+| Dimension (key) | What it measures (within 6–8 steps) | 1 (drop-off risk) | 5 (starts to click) |
 |---|---|---|---|
-| **clarity** — 첫인상 명료성 | Within ~5s, is it clear what this app/site is for? | No idea what to do | Purpose & how-to instantly clear |
-| **coldStart** — Cold start / 빈 화면 | Does the very first screen actively guide the user? | Just an empty input, nothing to grab | Examples / suggested prompts lead the way |
-| **entryBarrier** — 진입 장벽 | Effort required to reach the first result | Forced signup / setup / tutorial | Type and get a result immediately |
-| **firstTaskSuccess** — 첫 과업 성공 | Does the first attempt actually succeed? | First result is wrong or spins uselessly | First try yields something usable |
-| **ahaReached** — Aha 순간 도달 | Do you hit an "oh, it works!" moment? | Ends flat, no spark | Surprised by a better-than-expected result |
-| **nextAction** — 다음 행동 유도 | Are you naturally pulled into a second action? | No idea what to do next | Obvious, inviting next step |
+| **clarity** — 첫인상 명료성 | Within ~5s / 1 step, is it clear what this app is for? | No idea what to do | Purpose & how-to instantly clear |
+| **coldStart** — Cold start / 빈 화면 | Does the very first screen actively guide you to a first action? | Just an empty input, nothing to grab | Examples / suggested prompts lead the way |
+| **entryBarrier** — 진입 장벽 | Effort (steps) required to reach the first value | Forced signup / setup before any value | Straight to value in a step or two |
+| **firstTaskSuccess** — 첫 과업 성공 | Did the first real attempt at the goal succeed? | First result wrong or spins uselessly | First try yields something usable |
+| **ahaReached** — Aha 순간 도달 | Did you hit an "oh, it works!" moment? | Ends flat, no spark | Surprised by a better-than-expected result |
+| **explorationEfficiency** — 탐색 효율 | Did you reach value without wandering? | Circled with no new screens, repeated actions | Shortest path, every step revealed something new |
 
-**score (First-Run AX Score)** = the average of the six dimensions (one decimal). Compute it,
-don't guess. Add a one-line `notes` justifying the weakest and strongest dimensions.
+Ground **explorationEfficiency** in the run: report `stepsToFirstValue` (or null if never
+reached), `newScreens` (distinct screens seen), and `duplicateActions` (repeated/looping actions).
+
+**score (First-Run AX Score)** = the average of the SIX experiential dimensions (one decimal).
+`stopReason` is a gate, not part of the average — the aggregator uses it to decide whether this
+session's scores count (done → count; budget_cut → count as a failure; stuck → excluded). Add a
+one-line `notes` justifying the weakest and strongest dimensions and, if not `done`, why.
 
 ## 5. Output — return ONLY this JSON (no prose around it)
 
@@ -108,14 +128,18 @@ don't guess. Add a one-line `notes` justifying the weakest and strongest dimensi
   ],
   "overallFriction": 0,
   "firstRunAX": {
+    "stopReason": "done | budget_cut | stuck",
+    "stepsToFirstValue": 3,
+    "newScreens": 4,
+    "duplicateActions": 0,
     "clarity": 3,
     "coldStart": 3,
     "entryBarrier": 3,
     "firstTaskSuccess": 3,
     "ahaReached": 3,
-    "nextAction": 3,
+    "explorationEfficiency": 3,
     "score": 3.0,
-    "notes": "one line: weakest and strongest first-run dimensions for this persona"
+    "notes": "one line: weakest and strongest dimensions; if not done, why it ended that way"
   },
   "retentionVerdict": "would-stay | would-leave | unsure",
   "summary": "2-3 sentences: this persona's overall verdict in their own voice."

@@ -26,10 +26,17 @@ non-empty, show a small caveat that some persona scores were invalid.
 - **Aha highlights:** Collect the strongest aha-moments (highest impact, or shared).
 - **Predicted funnel:** From `predictedDropoff` and `retentionVerdict`, describe where users
   are most likely to leave and which personas are at risk.
-- **First-Run AX:** Take the **overall First-Run AX Score**, **per-dimension averages**, and
+- **First-Run AX:** Take the **overall First-Run AX Score**, **per-dimension averages** (clarity,
+  coldStart, entryBarrier, firstTaskSuccess, ahaReached, explorationEfficiency), and
   **weakest/strongest dimension** directly from the metrics JSON (`metrics.firstRunAX`) — already
   computed. Present the weakest dimension as the biggest first-run risk. Add qualitative color
   from the personas' `firstRunAX.notes`, but never change the numbers.
+- **Stop-reason gate (read this before trusting the scores):** `metrics.firstRunAX.stopReasons`
+  breaks sessions into `done` / `budget_cut` / `stuck`. Only `done` sessions are clean first-value
+  successes; `budget_cut` sessions are first-value **failures** (their value dims were capped low,
+  not immersion); `stuck` sessions were excluded and are listed in `rerunNeeded`. Lead with this —
+  a high score built on few `done` sessions is weak evidence. `scoredSessions` says how many
+  counted.
 - **Per-persona summary:** Keep each persona's overallFriction, firstRunAX.score,
   retentionVerdict, and one-line verdict.
 - **SWOT (required):** Synthesize everything above into a UX SWOT — this is mandatory, always
@@ -53,8 +60,11 @@ file to `${CLAUDE_PROJECT_DIR}/ux-report.html`. It must include:
   are **predicted heuristic** results, not measured user data.
 - A **First-Run AX Score** hero: the overall score (1–5, one decimal) shown prominently, with
   a small breakdown of the six per-dimension averages (clarity, coldStart, entryBarrier,
-  firstTaskSuccess, ahaReached, nextAction) — e.g. a radar or a row of 1–5 meters — and the
-  weakest dimension called out as the top first-run risk.
+  firstTaskSuccess, ahaReached, explorationEfficiency) — e.g. a radar or a row of 1–5 meters —
+  and the weakest dimension called out as the top first-run risk.
+- A **Stop-reason gate** panel right next to the hero: the done / budget_cut / stuck counts
+  (e.g. a small stacked bar), how many sessions were scored, and any personas flagged for re-run.
+  Make clear that only `done` sessions are clean successes and `budget_cut` = first-value failure.
 - **Top issues** list, sorted by priority score, each showing severity, affected-persona
   chips, heuristic tag, and the suggested fix.
 - A **friction-by-persona** view (e.g. bars of each persona's overallFriction 0–100) with

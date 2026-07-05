@@ -26,8 +26,13 @@ DIMS = [
     "entryBarrier",
     "firstTaskSuccess",
     "ahaReached",
-    "nextAction",
+    "explorationEfficiency",
 ]
+
+VALID_STOP = {"done", "budget_cut", "stuck"}
+# On budget_cut (never reached first value) these dims are capped low: not immersion.
+GATED_LOW_DIMS = ("firstTaskSuccess", "ahaReached")
+BUDGET_CUT_CAP = 2
 
 
 def fail(msg):
@@ -66,38 +71,61 @@ def main():
 
     warnings = []
 
-    # ---- First-Run AX ---------------------------------------------------
+    # ---- First-Run AX (gated by stopReason) -----------------------------
+    # stopReason gates validity: done -> score counts; budget_cut -> counts as a
+    # first-value failure (value dims capped low); stuck -> contaminated, excluded
+    # and flagged for re-run.
     per_persona_ax = []
     dim_values = {d: [] for d in DIMS}
+    stop_counts = {"done": 0, "budget_cut": 0, "stuck": 0, "unknown": 0}
+    rerun_needed = []
 
     for i, p in enumerate(personas):
         persona = p.get("persona") or {}
         pid = persona.get("id") or persona.get("name") or f"persona-{i + 1}"
         ax = p.get("firstRunAX") or {}
-        collected = []
+
+        stop = ax.get("stopReason")
+        if stop not in VALID_STOP:
+            warnings.append(f"{pid}: firstRunAX.stopReason missing/invalid (got {json.dumps(stop)}); treated as 'unknown'")
+            stop = "unknown"
+        stop_counts[stop] += 1
+
+        # stuck = contaminated -> exclude from scoring, flag for re-run.
+        if stop == "stuck":
+            rerun_needed.append(pid)
+            per_persona_ax.append({"id": pid, "stopReason": stop, "included": False, "score": None})
+            continue
+
+        collected, complete, gated = [], True, []
         for d in DIMS:
             v = ax.get(d)
-            if valid_score(v):
-                dim_values[d].append(v)
-                collected.append(v)
-            else:
-                warnings.append(
-                    f"{pid}: firstRunAX.{d} missing or out of range (got {json.dumps(v)})"
-                )
-        # Recompute the persona score from the dimensions -- authoritative, ignores
-        # any score the LLM wrote.
-        if len(collected) == len(DIMS):
+            if not valid_score(v):
+                warnings.append(f"{pid}: firstRunAX.{d} missing or out of range (got {json.dumps(v)})")
+                complete = False
+                continue
+            # budget_cut: cap the value dims low regardless of what the agent wrote.
+            if stop == "budget_cut" and d in GATED_LOW_DIMS and v > BUDGET_CUT_CAP:
+                gated.append(d)
+                v = BUDGET_CUT_CAP
+            dim_values[d].append(v)
+            collected.append(v)
+        if gated:
+            warnings.append(f"{pid}: budget_cut -> {', '.join(gated)} capped at {BUDGET_CUT_CAP} (first-value failure, not immersion)")
+
+        # Recompute the persona score from the (gated) dimensions -- authoritative.
+        if complete:
             score = round1(mean(collected))
         else:
             score = None
             warnings.append(f"{pid}: First-Run AX score not computed (incomplete dimensions)")
-        per_persona_ax.append({"id": pid, "score": score})
+        per_persona_ax.append({"id": pid, "stopReason": stop, "included": True, "score": score})
 
     dimension_averages = {
         d: (round1(mean(dim_values[d])) if dim_values[d] else None) for d in DIMS
     }
 
-    persona_scores = [p["score"] for p in per_persona_ax if p["score"] is not None]
+    persona_scores = [p["score"] for p in per_persona_ax if p.get("included") and p["score"] is not None]
     overall_score = round1(mean(persona_scores)) if persona_scores else None
 
     ranked = sorted(
@@ -132,6 +160,9 @@ def main():
         "personaCount": len(personas),
         "firstRunAX": {
             "overallScore": overall_score,
+            "scoredSessions": len(persona_scores),
+            "stopReasons": stop_counts,
+            "rerunNeeded": rerun_needed,
             "dimensionAverages": dimension_averages,
             "weakestDimension": weakest_dimension,
             "strongestDimension": strongest_dimension,

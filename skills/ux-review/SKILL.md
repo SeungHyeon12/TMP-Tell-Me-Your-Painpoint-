@@ -74,9 +74,12 @@ python "${CLAUDE_PLUGIN_ROOT}/scripts/aggregate.py" "${CLAUDE_PROJECT_DIR}/.ux-v
 ```
 
 This prints an exact metrics JSON (overall First-Run AX Score, per-dimension averages, weakest
-dimension, friction average, retention counts). **Use these numbers verbatim** — never recompute
-averages by hand. If the output contains `warnings`, surface them (a persona returned an invalid
-or missing score) but continue.
+dimension, the **stop-reason gate** — done/budget_cut/stuck counts, scored-session count, and any
+personas flagged for re-run — plus friction average and retention counts). **Use these numbers
+verbatim** — never recompute averages by hand. Note the gate: only `done` sessions are clean
+first-value successes, `budget_cut` sessions are first-value failures (their value dims were capped
+low), and `stuck` sessions were excluded. If the output contains `warnings`, surface them but
+continue. If `rerunNeeded` is non-empty, tell the user those personas got stuck and could be re-run.
 
 ## Synthesize and publish
 
@@ -87,5 +90,6 @@ interactive dashboard to `${CLAUDE_PROJECT_DIR}/ux-report.html` and returns a su
 Then publish that file with the **Artifact** tool so the user gets a shareable dashboard.
 
 Finally, give the user a short text recap: the **First-Run AX Score** (1–5) with its weakest
-dimension, the headline verdict, the top 3 issues (severity + affected personas + fix), and the
+dimension, the **stop-reason gate** (how many personas reached first value / done vs budget_cut vs
+stuck), the headline verdict, the top 3 issues (severity + affected personas + fix), and the
 strongest aha-moment. Point them to the dashboard for detail.
