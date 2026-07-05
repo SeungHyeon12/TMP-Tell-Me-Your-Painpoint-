@@ -17,7 +17,7 @@ Confirm all four before any browser action (args are pre-fills only; still confi
 
 1. **url** (required). If missing, ask and stop.
 2. **One persona** — this loop runs for EXACTLY ONE persona. Read
-   `${CLAUDE_PLUGIN_ROOT}/shared/decay-personas.json`, present the available personas (id + the
+   `${CLAUDE_PLUGIN_ROOT}/skills/ux-review-one-persona-loop/shared/decay-personas.json`, present the available personas (id + the
    "what bores them" gist) in one line each, and ask the user to pick ONE — or to define a custom
    persona. If the custom one is thin, refine it (persona + task_goal + what makes them lose
    interest) and show it back for approval.
@@ -70,7 +70,7 @@ Write the collected visits to a temp file, e.g.:
 at `${CLAUDE_PROJECT_DIR}/.decay-visits.json`, then run:
 
 ```
-python "${CLAUDE_PLUGIN_ROOT}/scripts/decay_slope.py" "${CLAUDE_PROJECT_DIR}/.decay-visits.json"
+python "${CLAUDE_PLUGIN_ROOT}/skills/ux-review-one-persona-loop/scripts/decay_slope.py" "${CLAUDE_PROJECT_DIR}/.decay-visits.json"
 ```
 
 Use its output **verbatim** — do not recompute the slope. The script **gates by stopReason**: the

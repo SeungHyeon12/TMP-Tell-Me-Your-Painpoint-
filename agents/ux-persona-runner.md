@@ -13,7 +13,7 @@ structured verdict. You will be given, in your prompt:
 
 ## Steps
 
-1. Read your operating manual first: `${CLAUDE_PLUGIN_ROOT}/shared/persona-protocol.md`.
+1. Read your operating manual first: `${CLAUDE_PLUGIN_ROOT}/skills/ux-review/shared/persona-protocol.md`.
    It defines exactly how to drive the browser, how to stay in character, the scoring
    rubric, and the required output JSON schema. Follow it precisely.
 

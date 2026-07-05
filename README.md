@@ -52,24 +52,26 @@ Example:
 
 ## Project layout
 
+Only `agents/` and `skills/` hold content at the top level; each skill is self-contained — the
+`scripts/` and `shared/` files it uses live inside its own folder, next to `SKILL.md`.
+
 ```
 .claude-plugin/plugin.json   # manifest
 .mcp.json                    # Playwright MCP server
+agents/                      # plugin-level subagents (invoked by the skills)
+  ux-persona-runner.md         # generic single-persona First-Run walkthrough executor
+  ux-synthesizer.md            # semantic synthesis + dashboard builder
+  ux-decay-runner.md           # one repeat-visit for the interest-decay loop
 skills/
-  ux-review/SKILL.md               # orchestrator skill (auto-invocable + /tmp-ux:ux-review)
+  ux-review/                       # goal-oriented First-Run evaluation (/tmp-ux:ux-review)
+    SKILL.md
+    scripts/aggregate.py             # deterministic score aggregation (Python, stdlib only)
+    shared/default-personas.md       # the 5 default persona profiles
+    shared/persona-protocol.md       # browsing protocol + output schema + scoring rubric
   ux-review-one-persona-loop/      # single-persona interest-decay loop (up to 7 visits)
     SKILL.md
-agents/
-  ux-persona-runner.md       # generic single-persona walkthrough executor
-  ux-synthesizer.md          # semantic synthesis + dashboard builder
-  ux-decay-runner.md         # one repeat-visit for the interest-decay loop
-scripts/
-  aggregate.py               # deterministic score aggregation (Python, stdlib only)
-  decay_slope.py             # least-squares interest-decay slope (Python, stdlib only)
-shared/
-  default-personas.md        # the 5 default persona profiles
-  persona-protocol.md        # browsing protocol + output schema + scoring rubric
-  decay-personas.json        # persona set + config for the decay loop
+    scripts/decay_slope.py           # gated least-squares decay slope (Python, stdlib only)
+    shared/decay-personas.json       # persona set + config for the decay loop
 ```
 
 ## Interest-decay loop (`/tmp-ux:ux-review-one-persona-loop`)

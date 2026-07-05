@@ -29,7 +29,7 @@ Personas pursue this goal directly on a short budget (~5 steps); wandering is tr
 
 ## Step 2 — Personas: explain defaults, offer custom, get approval
 
-1. **Explain the default line-up.** Read `${CLAUDE_PLUGIN_ROOT}/shared/default-personas.md` and
+1. **Explain the default line-up.** Read `${CLAUDE_PLUGIN_ROOT}/skills/ux-review/shared/default-personas.md` and
    present the 5 defaults to the user in one short line each:
    novice (nervous first-timer) · power (impatient power user) · a11y (accessibility-dependent) ·
    mobile (on-the-go phone user) · skeptic (trust/price-sensitive).
@@ -59,7 +59,7 @@ Pass each runner:
 - the target url,
 - the confirmed goal,
 
-and ask it to follow `${CLAUDE_PLUGIN_ROOT}/shared/persona-protocol.md` (goal-oriented, short
+and ask it to follow `${CLAUDE_PLUGIN_ROOT}/skills/ux-review/shared/persona-protocol.md` (goal-oriented, short
 budget) and return its JSON verdict. Collect each returned JSON object.
 
 If a runner returns malformed JSON or dies, note it and continue with the remaining personas.
@@ -70,7 +70,7 @@ Once all personas are done, write the collected array of verdict JSON objects to
 (e.g. `${CLAUDE_PROJECT_DIR}/.ux-verdicts.json`) and run:
 
 ```
-python "${CLAUDE_PLUGIN_ROOT}/scripts/aggregate.py" "${CLAUDE_PROJECT_DIR}/.ux-verdicts.json"
+python "${CLAUDE_PLUGIN_ROOT}/skills/ux-review/scripts/aggregate.py" "${CLAUDE_PROJECT_DIR}/.ux-verdicts.json"
 ```
 
 This prints an exact metrics JSON (overall First-Run AX Score, per-dimension averages, weakest
